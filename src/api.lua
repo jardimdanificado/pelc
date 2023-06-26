@@ -2,13 +2,6 @@ local util = require('src.util')
 local api = {}
 api.util = util
 
---[[
-api.colors = 
-{
-    "black","green","yellow","blue","magenta","cyan","white","reset"
-}
---]]
-
 api.run = function(session, command)
     local fullcmd = command or io.read()
     local splited = util.console.formatcmd(fullcmd)
@@ -31,11 +24,16 @@ api.run = function(session, command)
     end
 end
 
+api.spawn = function(session,worker) 
+
+end
+
 api.new = {
     session = function()
         local session = 
         {
             data = {},
+            worker={},
             run = api.run,
             api = api,
             exit = false,
