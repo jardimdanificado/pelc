@@ -20,7 +20,7 @@ std['>'] = function(_session,args,cmd)
 end
 
 std.clear = function(s,a)
-    s.api.util.unix("clear","clr")
+    os.execute(s.api.util.unix("clear","clr"))
 end
 
 std.pause = function(session,args)
