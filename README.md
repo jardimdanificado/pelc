@@ -5,7 +5,7 @@ The reference _Plugin Extensible Lua Console_ implementation.
 ## pelc - Command-line Commands
 
 - `pelc` : Starts the pelc
-- `pelc (file)` : Starts the repl with the specified script(.lup)
+- `pelc (file)` : Starts the repl with the specified script(.pelc)
 - `pelc -lstd` : Starts the repl with the specified preloaded lib(require), in this case _lib.std_
 - `pelc -l lib/std.lua` : Starts the repl with the specified not-preloaded lib(import), in this case _./lib/std.lua_
 
@@ -21,7 +21,7 @@ The reference _Plugin Extensible Lua Console_ implementation.
 - `run (scriptname)` : run the (_filename_) script
 - `pause` : send the user to api.run()
 - `echo (string)` : print text and proceed
-- `> (cmd)` : access lua layer
-- `$ (cmd)` : direcly access OS layer( os.execute((_cmd_)) )
+- `> (cmd)` : direct access to lua layer
+- `$ (cmd)` : direct access to OS terminal
 - `exit` : quit, but complete the current loop
 - `terminate` : force quit, terminate the process
