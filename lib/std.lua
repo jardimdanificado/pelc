@@ -31,7 +31,7 @@ std.exit = function(session,args)
     session.exit = true
 end
 
-std['end'] = function(session,args)
+std['terminate'] = function(session,args)
     os.exit()
 end
 
