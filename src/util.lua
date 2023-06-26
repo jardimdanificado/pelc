@@ -180,8 +180,7 @@ end
 
 util.string.replace = function(inputString, oldSubstring, newSubstring)
     newSubstring = newSubstring or ''
-    local resultString = inputString:gsub(oldSubstring, newSubstring)
-    return resultString
+    return inputString:gsub(oldSubstring, newSubstring)
 end
 
 util.string.includes = function(str, substring)
@@ -676,7 +675,7 @@ end
 util.id = function(charTable)
     charTable = charTable or util.char
     local tablelen = #charTable
-    local numbers = util.string.replace(os.clock() .. os.time(), '%.', '')
+    local numbers  = util.string.replace(os.clock() .. os.time(), '%.', '')
     numbers = util.string.split(numbers, '')
     local result = ""
     for i = 1, #numbers do
@@ -708,24 +707,13 @@ util.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows re
 end
 
 util.console.formatcmd = function(fullcmd)
-    while util.string.includes(fullcmd, '\n') do
-        fullcmd = util.string.replace(fullcmd, '\n', ';')
-    end
-
-    while util.string.includes(fullcmd, '  ') do
-        fullcmd = util.string.replace(fullcmd, '  ', ' ')
-    end
-
-    fullcmd = util.string.replace(fullcmd, '; ', ';')
-    fullcmd = util.string.replace(fullcmd, ' ;', ';')
-
-    local splited = util.string.split(fullcmd, ';')
-    for i, v in ipairs(splited) do
-        if util.string.includes(v, '--') then
-            splited[i] = ''
-        end
-    end
-    return splited
+    fullcmd:gsub("%s+", " ")
+    fullcmd:gsub('; ', ';')
+    fullcmd:gsub(' ;', ';')
+    fullcmd:gsub(';\n', ';')
+    fullcmd:gsub('\n;', ';')
+    
+    return util.string.split(fullcmd, ';')
 end
 
 util.console.colors = 

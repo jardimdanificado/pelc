@@ -4,9 +4,7 @@ api.util = util
 
 api.run = function(session, command)
     local fullcmd = command or io.read()
-    local splited = util.console.formatcmd(fullcmd)
-    
-    for i, cmd in ipairs(splited) do
+    for i, cmd in ipairs(util.console.formatcmd(fullcmd)) do
         if cmd ~= '' then
             local split = api.util.string.split(cmd, " ")
             cmd = string.gsub(cmd, "^%s*(.-)%s*$", "%1")
@@ -15,8 +13,7 @@ api.run = function(session, command)
                 table.insert(args,split[i])
             end
             if session.cmd[split[1]] == nil then
-                print("unknown command!")
-                session:run()
+                print(split[1] .. " is not a command!")
             else
                 session.cmd[split[1]](session,args,cmd)
             end
@@ -86,7 +83,7 @@ api.start = function(session)
             skip = "import "
         elseif util.string.includes(v,'-l') then
             session:run("require lib." .. util.string.replace(v,'-l',''))
-        elseif util.string.includes(v,'.pxl') then
+        elseif util.string.includes(v,'.lup') then
             table.insert(laterscript,v)
         end
     end
