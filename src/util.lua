@@ -386,22 +386,12 @@ util.array.includes = function(arr, value)
     return false
 end
 
-util.array.serialize = function(tbl)
-    local result = {}
-    for k, v in pairs(tbl) do
-        local key = type(k) == "number" and "[" .. k .. "]" or k
-        local val = type(v) == "table" and serializeTable(v) or v
-        if type(v) == "function" then
-            result[#result + 1] = key .. "=loadstring(" .. string.format("%q", string.dump(v)) .. ")"
-        elseif type(val) ~= "function" then
-            result[#result + 1] = key .. "=" .. val
-        end
+util.array.tostring = function(arr)
+    local result = ''
+    for i, v in ipairs(arr) do
+        result = result .. ' ' .. v
     end
-    return "{" .. table.concat(result, ",") .. "}"
-end
-util.array.deserialize = function(str)
-    local f = loadstring("return " .. str)
-    return f()
+    return result
 end
 
 util.matrix.includes = function(matrix, value)

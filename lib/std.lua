@@ -1,12 +1,7 @@
 local std = {}
 
-std.run = function(session,args,cmd)
-    session:run(session.api.util.file.load.text(args[1]))
-end
-
 std['$'] = function(session,args,cmd)
     local lcmd = 'os.execute("' .. session.api.util.string.replace(cmd, "%$")  .. '")'
-    print(lcmd)
     assert(session.api.util.load(lcmd))()
     session:run()
 end
@@ -39,6 +34,40 @@ std.echo = function(session,args) --unblocked
         io.write(v .. ' ')
     end
     io.write('\n')
+end
+
+std.sets = function(session,args)
+    local finalargs = {}
+    for i = 2,1 do 
+        table.insert(finalargs,args[i])
+    end
+    session.data[args[1]] = session.api.util.array.unpack(finalargs)
+end
+
+std.seti = function(session,args)
+    session.data[args[1]] = math.floor(tonumber(args[2]))
+end
+
+std.setn = function(session,args)
+    session.data[args[1]] = tonumber(args[2])
+end
+
+std.def = function(session,args,cmd)
+    local util = session.api.util
+    local finalargs = {}
+    for i = 2,1 do 
+        table.insert(finalargs,args[i])
+    end
+    session.data[args[1]] = util.load("function(session,args,cmd) " .. util.array.tostring(finalargs) .. ' end')
+end
+
+std.defcmd = function(session,args,cmd)
+    local util = session.api.util
+    local finalargs = {}
+    for i = 2,1 do 
+        table.insert(finalargs,args[i])
+    end
+    session.cmd[args[1]] = util.load("function(session,args,cmd) " .. util.array.tostring(finalargs) .. ' end')
 end
 
 std.help = function(session,args)

@@ -37,15 +37,18 @@ api.new = {
             time = 0,
             cmd = 
             {
+                run = function(session,args)
+                    session:run(util.file.load.text(args[1]))
+                end,
                 require = function(session,args)
                     local templib
-                    if not session.api.util.string.includes(args[1],'lib.') and not session.api.util.string.includes(args[1],'/') and not session.api.util.string.includes(args[1],'\\') then
+                    if not util.string.includes(args[1],'lib.') and not util.string.includes(args[1],'/') and not util.string.includes(args[1],'\\') then
                         templib = require('lib.' .. args[1])
                     else
                         templib = require(
-                            session.api.util.string.replace(
-                                session.api.util.string.replace(
-                                    session.api.util.string.replace(args[1],'.lua',''),'/','.'),'\\','.'))
+                            util.string.replace(
+                                util.string.replace(
+                                    util.string.replace(args[1],'.lua',''),'/','.'),'\\','.'))
                     end
                     if templib._preload ~= nil then
                         templib._preload(session)
@@ -58,7 +61,7 @@ api.new = {
                     end
                 end,
                 import = function(session,args)
-                    if not session.api.util.file.exist(args[1]) then
+                    if not util.file.exist(args[1]) then
                         return
                     end
                     local templib = dofile(args[1])
@@ -83,7 +86,7 @@ api.start = function(session)
             skip = "import "
         elseif util.string.includes(v,'-l') then
             session:run("require lib." .. util.string.replace(v,'-l',''))
-        elseif util.string.includes(v,'.lup') then
+        elseif util.string.includes(v,'.pelc') then
             table.insert(laterscript,v)
         end
     end
