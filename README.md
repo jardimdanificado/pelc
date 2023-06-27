@@ -1,7 +1,3 @@
-## plec - Portable Lua Extensible Console
-
-The reference _Portable Lua Extensible Console_ implementation.
-
 ## plec - Command-line Commands
 
 - `plec` : Starts the plec
