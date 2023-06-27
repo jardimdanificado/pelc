@@ -1,76 +1,70 @@
 local std = {}
 
-std['$'] = function(session,args,cmd)
-    local lcmd = 'os.execute("' .. session.api.util.string.replace(cmd, "%$")  .. '")'
-    assert(session.api.util.load(lcmd))()
+std['$'] = function(session,api,args,cmd)
+    local lcmd = 'os.execute("' .. api.string.replace(cmd, "%$")  .. '")'
+    assert(api.load(lcmd))()
     session:run()
 end
 
-std['>'] = function(_session,args,cmd)
+std['>'] = function(_session,api,args,cmd)
     session = _session
-    cmd = _session.api.util.string.replace(cmd, ">", '')
-    assert(_session.api.util.load(cmd))()
+    cmd = _api.string.replace(cmd, ">", '')
+    assert(_api.load(cmd))()
     session = nil
 end
 
 std.clear = function(s,a)
-    os.execute(s.api.util.unix("clear","clr"))
+    os.execute(s.api.unix("clear","clr"))
 end
 
-std.pause = function(session,args)
+std.pause = function(session,api,args)
     session:run()
 end
 
-std.exit = function(session,args)
+std.exit = function(session,api,args)
     session.exit = true
 end
 
-std.terminate = function(session,args)
+std.terminate = function(session,api,args)
     os.exit()
 end
 
-std.echo = function(session,args) --unblocked
+std.echo = function(session,api,args) --unblocked
     for i, v in ipairs(args) do
         io.write(v .. ' ')
     end
     io.write('\n')
 end
 
-std.sets = function(session,args)
+std.solve = function(session,api,args, cmd)
+    print('return ' .. cmd:gsub('solve ',''))
+    local result = (api.load('return ' .. cmd:gsub('solve ','')))()
+    
+    return result
+end
+
+std.set = function(session,api,args, cmd)
     local finalargs = {}
-    for i = 2,1 do 
-        table.insert(finalargs,args[i])
+    for i = 2, 1, -1 do
+        table.insert(finalargs, args[i])
     end
-    session.data[args[1]] = session.api.util.array.unpack(finalargs)
-end
-
-std.seti = function(session,args)
-    session.data[args[1]] = math.floor(tonumber(args[2]))
-end
-
-std.setn = function(session,args)
-    session.data[args[1]] = tonumber(args[2])
-end
-
-std.def = function(session,args,cmd)
-    local util = session.api.util
-    local finalargs = {}
-    for i = 2,1 do 
-        table.insert(finalargs,args[i])
+    session.data[args[1]] = api.array.unpack(finalargs)
+    local newcmd = cmd:gsub(args[1] .. ' ', '')
+    newcmd = newcmd:gsub("set ", '')
+    if args[2] == 'true' or args[2] == 'false' then
+        session.data[args[1]] = args[2] == true and true or false
+    elseif tonumber(newcmd) then
+        session.data[args[1]] = tonumber(newcmd)
+    else
+        session.data[args[1]] = newcmd
     end
-    session.data[args[1]] = util.load("function(session,args,cmd) " .. util.array.tostring(finalargs) .. ' end')
 end
 
-std.defcmd = function(session,args,cmd)
-    local util = session.api.util
-    local finalargs = {}
-    for i = 2,1 do 
-        table.insert(finalargs,args[i])
-    end
-    session.cmd[args[1]] = util.load("function(session,args,cmd) " .. util.array.tostring(finalargs) .. ' end')
+std.fn = function(session,api,args,cmd)
+    session.cmd[args[1]] = (api.load("return function(session,api,args,cmd) " .. cmd:gsub('fn',''):gsub(args[1],'') .. ' end'))()
 end
 
-std.help = function(session,args)
+std.help = function(session,api,args)
     io.write("\27[32mAvaliable commands:\27[0m ")
     for k, v in pairs(session.cmd) do
         io.write(k .. ', ') 
