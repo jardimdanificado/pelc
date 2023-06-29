@@ -1,41 +1,16 @@
 local std = {}
 
 std['$'] = function(session,api,args,cmd)
-    os.execute(cmd:gsub("%$"))
+    local lcmd = 'os.execute("' .. api.string.replace(cmd, "%$")  .. '")'
+    assert(api.load(lcmd))()
+    return ''
 end
 
-std['>>'] = function(_session,_api,args,cmd)
+std['>'] = function(_session,api,args,cmd)
     session = _session
-    api = _api
-    assert(_api.load(cmd:gsub( "%>%>", '')))()
+    cmd = _api.string.replace(cmd, ">", '')
+    assert(_api.load(cmd))()
     session = nil
-    api = nil
-end
-
-std['>'] = function(_session,_api,args,cmd)
-    return assert(_api.load(cmd:gsub( "%>", '')))()
-end
-
-std['expose'] = function(_session,_api,args,cmd)
-    if args[1] == "session" then
-        session = _session
-    elseif args[1] == "api" then
-        api = _api
-    else
-        session = _session
-        api = _api
-    end
-end
-
-std['hide'] = function(_session,_api,args,cmd)
-    if args[1] == "session" then
-        session = nil
-    elseif args[1] == "api" then
-        api = nil
-    else
-        session = nil
-        api = nil
-    end
 end
 
 std.clear = function(s,a)
@@ -43,7 +18,7 @@ std.clear = function(s,a)
 end
 
 std.pause = function(session,api,args)
-    api.run(session)
+    session:run()
 end
 
 std.exit = function(session,api,args)
@@ -54,7 +29,7 @@ std.terminate = function(session,api,args)
     os.exit()
 end
 
-std.echo = function(session,api,args)
+std.echo = function(session,api,args) --unblocked
     for i, v in ipairs(args) do
         io.write(v .. ' ')
     end
@@ -62,9 +37,8 @@ std.echo = function(session,api,args)
 end
 
 std.solve = function(session,api,args, cmd)
-    print('return ' .. cmd:gsub('solve ',''))
-    local result = (api.load('return ' .. cmd:gsub('solve ','')))()
-    
+    local result = api.load('return ' .. cmd:gsub('solve ','')) or function() end
+    result = result() or ''
     return result
 end
 

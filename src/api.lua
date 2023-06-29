@@ -467,7 +467,7 @@ api.matrix.unique = function(matrix)
             end
         end
     end
-
+    -- print(unique_vals[4],unique_vals[8])
     return unique_vals
 end
 
@@ -669,6 +669,7 @@ api.id = function(charTable)
     numbers = api.string.split(numbers, '')
     local result = ""
     for i = 1, #numbers do
+        -- print 'a'
         result = result .. numbers[i]
         result = result .. charTable[api.random(1, tablelen)]
     end
@@ -783,50 +784,36 @@ api.getlink =  function(str)
     return ('&' .. match), result
 end
 
+
 api.run = function(session, command)
     command = command or io.read()
-    local result
+    local result = ''
     for i, cmd in ipairs(api.console.formatcmd(command)) do
-        for k, v in pairs(session.worker) do --workers
-            v(session,api,nil,command)
+        if api.string.includes(cmd, '&') then
+            cmd = cmd:gsub("&%s+", "&")
+            local newc = cmd .. ''
+            local links = {}
+            while api.string.includes(newc,"&") == true do
+                local link,result = api.getlink(newc)
+                newc = result
+                table.insert(links,link)
+            end
+            for i, link in ipairs(links) do
+                cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
+            end
         end
-        session.time = session.time + 1
+        if api.string.includes(cmd, '!(') or api.string.includes(cmd, '!%b(') then
+            local startPos, endPos = cmd:find('!%((.-)%)!')
+            while startPos do
+                local newstr = cmd:sub(startPos, endPos)
+                local content = newstr:match('!%((.-)%)!')  -- Extract the content within parentheses
+                local result = session:run(content)
+                cmd = cmd:sub(1, startPos - 1) .. result .. cmd:sub(endPos + 1)
+                startPos, endPos = cmd:find('!%((.-)%)!')
+            end
+        end        
+        
         if cmd ~= '' then
-            if api.string.includes(cmd, '!(') or api.string.includes(cmd, '!%b(') then
-                local startPos, endPos = cmd:find('!%b()')
-                while startPos do
-                local newstr = cmd:sub(startPos, endPos)
-                local content = newstr:match('!%((.-)%)')  -- Extract the content within parentheses
-                local result = api.run(session,content)
-                cmd = cmd:sub(1, startPos - 1) .. result .. cmd:sub(endPos + 1)
-                startPos, endPos = cmd:find('!%b()')
-                end
-            end
-            if api.string.includes(cmd, '$(') or api.string.includes(cmd, '$%b(') then
-                local startPos, endPos = cmd:find('$%b()')
-                while startPos do
-                local newstr = cmd:sub(startPos, endPos)
-                local content = newstr:match('$%((.-)%)')  -- Extract the content within parentheses
-                local handle = io.popen(content)
-                local result = handle:read("*a")
-                handle:close()
-                cmd = cmd:sub(1, startPos - 1) .. result .. cmd:sub(endPos + 1)
-                startPos, endPos = cmd:find('$%b()')
-                end
-            end
-            if api.string.includes(cmd, '&') then
-                cmd = cmd:gsub("&%s+", "&")
-                local newc = cmd .. ''
-                local links = {}
-                while api.string.includes(newc,"&") == true do
-                    local link,result = api.getlink(newc)
-                    newc = result
-                    table.insert(links,link)
-                end
-                for i, link in ipairs(links) do
-                    cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
-                end
-            end
             local split = api.string.split(cmd, " ")
             cmd = string.gsub(cmd, "^%s*(.-)%s*$", "%1")
             local args = {}
@@ -843,7 +830,7 @@ api.run = function(session, command)
     return result
 end
 
-api.spawn = function(session,method)
+api.spawn = function(session,worker) 
 
 end
 
@@ -853,6 +840,7 @@ api.new = {
         {
             data = {},
             worker={},
+            run = api.run,
             exit = false,
             time = 0,
             cmd = 
@@ -900,21 +888,21 @@ api.start = function(session)
     local skip = false
     for i, v in ipairs(arg) do
         if skip ~= false then
-            api.run(session,skip .. v)
+            session:run(skip .. v)
             skip = false
         elseif v == '-l' then
             skip = "import "
         elseif api.string.includes(v,'-l') then
-            api.run(session,"require lib." .. api.string.replace(v,'-l',''))
+            session:run("require lib." .. api.string.replace(v,'-l',''))
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
         end
     end
     for i, v in ipairs(laterscript) do
-        api.run(session,api.file.load.text(v))
+        session:run(api.file.load.text(v))
     end
     while not session.exit do
-        api.run(session)
+        session:run()
     end
     session.exit = false
 end

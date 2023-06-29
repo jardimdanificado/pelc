@@ -27,7 +27,5 @@
 ## plec - Syntax
 
 - `&varaible` : is replaced by the _vatiable_ value
-- `$(command)` : run _command_ on OS layer, is replaced by its terminal output
-- `>(command)` : run _command_ on lua layer, otg version of > operator
-- `!(command)` : run _command_ on plec layer, otg version of solve
+- `!(command)!` : run _command_ on plec layer
 - ` ; ` : separate finish the command and start another
