@@ -14,18 +14,21 @@
 ## plec - Standard Library(lib.std)
 
 - `help` : list all loaded commands
-- `solve` : solve a lua code
+
 - `clear` : clear terminal
 - `pause` : send the user to api.run()
-- `echo string` : print text and proceed
-- `> cmd` : direct access to lua layer
+- `echo string` : print text and return it
+- `--- string` : return comment
+- `solve lua-code` : solve a lua code
+- `> lua-code` : same as solve
 - `$ cmd` : direct access to OS terminal
-- `fn lua-code-here` : create a command from inside plec
+- `set name anything` : set a variable inside plec's session
+- `def lua-code-here` : create a command from inside plec
 - `exit` : quit, but complete the current loop
 - `terminate` : force quit, terminate the process
 
 ## plec - Syntax
 
-- `&varaible` : is replaced by the _vatiable_ value
+- `&variable` : is replaced by the _vatiable_ value
 - `!(command)!` : run _command_ on plec layer
 - ` ; ` : separate finish the command and start another

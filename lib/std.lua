@@ -3,14 +3,6 @@ local std = {}
 std['$'] = function(session,api,args,cmd)
     local lcmd = 'os.execute("' .. api.string.replace(cmd, "%$")  .. '")'
     assert(api.load(lcmd))()
-    return ''
-end
-
-std['>'] = function(_session,api,args,cmd)
-    session = _session
-    cmd = _api.string.replace(cmd, ">", '')
-    assert(_api.load(cmd))()
-    session = nil
 end
 
 std.clear = function(s,a)
@@ -30,10 +22,12 @@ std.terminate = function(session,api,args)
 end
 
 std.echo = function(session,api,args) --unblocked
+    local txt = ''
     for i, v in ipairs(args) do
-        io.write(v .. ' ')
+        txt = txt .. v .. ' '
     end
-    io.write('\n')
+    print(txt)
+    return txt
 end
 
 std.solve = function(session,api,args, cmd)
@@ -59,8 +53,8 @@ std.set = function(session,api,args, cmd)
     end
 end
 
-std.fn = function(session,api,args,cmd)
-    session.cmd[args[1]] = (api.load("return function(session,api,args,cmd) " .. cmd:gsub('fn',''):gsub(args[1],'') .. ' end'))()
+std.def = function(session,api,args,cmd)
+    session.cmd[args[1]] = (api.load("return function(session,api,args,cmd) " .. cmd:gsub('def '.. args[1] ,'',1) .. ' end'))()
 end
 
 std.help = function(session,api,args)
@@ -69,6 +63,14 @@ std.help = function(session,api,args)
         io.write(k .. ', ') 
     end
     io.write('\n')
+end
+
+std["---"] = function(session,api,args)
+    local txt = ''
+    for i, v in ipairs(args) do
+        txt = txt .. v .. ' '
+    end
+    return txt
 end
 
 return std
