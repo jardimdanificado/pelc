@@ -120,34 +120,28 @@ api.spawn = function(session,func,timer,id)
 end
 
 api.loadcmds = function(session,templib)
-    templib.workers = templib.workers or {}
-    if templib._preload ~= nil then
-        templib._preload(session)
+    templib.worker = templib.worker or {}
+    if templib.preload ~= nil then
+        templib.preload(session)
     end
     for k, v in pairs(templib) do
-        if k ~= '_setup' and k ~= '_preload' and k ~= '_workers' then
+        if k ~= 'setup' and k ~= 'preload' and k ~= 'worker' then
             session.cmd[k] = v
         end
     end
-    for k, worker in pairs(templib.workers) do
-        
-        if type(worker) == 'table' then
-            worker.id = worker.id or api.id()
-            worker.timer = worker.timer or 1
-            worker.func = worker.func or function() end
-            session.worker[k] = worker
-        elseif type(worker) == 'function' then
+    for k, workerfunc in pairs(templib.worker) do
+        if api.string.includes(k,'_timer') == false and api.string.includes(k,'_id') == false then
             local _worker = 
             {
-                id = api.id(),
-                timer = 1,
-                func = worker
+                id = templib.worker[k .. '_id'] or k,
+                timer = templib.worker[k .. '_timer'] or 1,
+                func = workerfunc
             }
             session.worker[k] = _worker
         end
     end
-    if templib._setup ~= nil then
-        templib._setup(session)
+    if templib.setup ~= nil then
+        templib.setup(session)
     end
 end
 
