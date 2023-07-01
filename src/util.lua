@@ -696,7 +696,6 @@ api.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows ret
     end
 end
 
-
 api.stringify = function(obj, indent)
     if obj == nil then
         return ''

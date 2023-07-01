@@ -46,44 +46,60 @@ api.getlink =  function(str)
     return ('&' .. match), result
 end
 
+api.worker = {}
+api.worker.unref = function(session, api ,cmd)
+    if api.string.includes(cmd, '&') then
+        cmd = cmd:gsub("&%s+", "&")
+        local newc = cmd
+        local links = {}
+        while api.string.includes(newc,"&") == true do
+            local link,result = api.getlink(newc)
+            newc = result
+            table.insert(links,link)
+        end
+        for i, link in ipairs(links) do
+            cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
+        end
+    end
+    return cmd
+end
+
+api.worker.unwrapcmd = function(session, api, cmd)
+    if api.string.includes(cmd, '!(') or api.string.includes(cmd, '!%b(') then
+        local startPos, endPos = cmd:find('!%((.-)%)!')
+        while startPos do
+            local newstr = cmd:sub(startPos, endPos)
+            local content = newstr:match('!%((.-)%)!')  -- Extract the content within parentheses
+            local result = session:run(content) or ''
+            cmd = cmd:sub(1, startPos - 1) .. result .. cmd:sub(endPos + 1)
+            startPos, endPos = cmd:find('!%((.-)%)!')
+        end
+    end
+    return cmd
+end
+
+api.worker.spacendclean = function(session,api,cmd)
+    return string.gsub(cmd, "^%s*(.-)%s*$", "%1")
+end
 
 api.run = function(session, command)
     command = command or io.read()
     local result = ''
     for i, cmd in ipairs(api.console.formatcmd(command)) do
-        if api.string.includes(cmd, '&') then
-            cmd = cmd:gsub("&%s+", "&")
-            local newc = cmd
-            local links = {}
-            while api.string.includes(newc,"&") == true do
-                local link,result = api.getlink(newc)
-                newc = result
-                table.insert(links,link)
-            end
-            for i, link in ipairs(links) do
-                cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
+        for k, worker in pairs(session.worker) do
+            if session.time % worker.timer == 0 then
+                local tmp = worker.func(session,api,cmd,worker)
+                cmd = type(tmp) == "string" and tmp or cmd
             end
         end
-        if api.string.includes(cmd, '!(') or api.string.includes(cmd, '!%b(') then
-            local startPos, endPos = cmd:find('!%((.-)%)!')
-            while startPos do
-                local newstr = cmd:sub(startPos, endPos)
-                local content = newstr:match('!%((.-)%)!')  -- Extract the content within parentheses
-                local result = session:run(content) or ''
-                cmd = cmd:sub(1, startPos - 1) .. result .. cmd:sub(endPos + 1)
-                startPos, endPos = cmd:find('!%((.-)%)!')
-            end
-        end        
-        
         if cmd ~= '' then
             local split = api.string.split(cmd, " ")
-            cmd = string.gsub(cmd, "^%s*(.-)%s*$", "%1")
             local args = {}
             for i = 2, #split, 1 do
                 table.insert(args,split[i])
             end
             if session.cmd[split[1]] == nil then
-                print(split[1] .. " isnt a command!")
+                print(split[1] .. " is not a valid command!")
             else
                 result = session.cmd[split[1]](session,api,args,cmd)
             end
@@ -91,17 +107,64 @@ api.run = function(session, command)
     end
     return result
 end
-api.spawn = function(session,worker) 
 
+api.worker.timepass = function(session)
+    session.time = session.time + 1
+end
+
+api.spawn = function(session,func,timer,id) 
+    local worker = api.new.worker(func,timer)
+    worker.id = id or api.id()
+    session.worker[worker.id] = worker
+    return worker
+end
+
+api.loadcmds = function(session,templib)
+    templib.workers = templib.workers or {}
+    if templib._preload ~= nil then
+        templib._preload(session)
+    end
+    for k, v in pairs(templib) do
+        if k ~= '_setup' and k ~= '_preload' and k ~= '_workers' then
+            session.cmd[k] = v
+        end
+    end
+    for k, worker in pairs(templib.workers) do
+        
+        if type(worker) == 'table' then
+            worker.id = worker.id or api.id()
+            worker.timer = worker.timer or 1
+            worker.func = worker.func or function() end
+            session.worker[k] = worker
+        elseif type(worker) == 'function' then
+            local _worker = 
+            {
+                id = api.id(),
+                timer = 1,
+                func = worker
+            }
+            session.worker[k] = _worker
+        end
+    end
+    if templib._setup ~= nil then
+        templib._setup(session)
+    end
 end
 
 api.new = {
+    worker = function(func,timer)
+        local worker = {}
+        worker.func = func
+        worker.timer = timer or 1
+        return worker
+    end,
     session = function()
         local session = 
         {
             data = {},
-            worker={},
+            worker= {},
             run = api.run,
+            spawn = api.spawn,
             exit = false,
             time = 0,
             cmd = 
@@ -119,24 +182,13 @@ api.new = {
                                 api.string.replace(
                                     api.string.replace(args[1],'.lua',''),'/','.'),'\\','.'))
                     end
-                    if templib._preload ~= nil then
-                        templib._preload(session)
-                    end
-                    for k, v in pairs(templib) do
-                        session.cmd[k] = v
-                    end
-                    if templib._setup ~= nil then
-                        templib._setup(session)
-                    end
+                    api.loadcmds(session,templib)
                 end,
                 import = function(session,api,args)
                     if not api.file.exist(args[1]) then
                         return
                     end
-                    local templib = dofile(args[1])
-                    for k, v in pairs(templib) do
-                        session.cmd[k] = v
-                    end
+                    api.loadcmds(session,dofile(args[1]))
                 end,
                 ['--'] = function() end
             }
@@ -146,6 +198,10 @@ api.new = {
 }
 
 api.start = function(session)
+    session:spawn(api.worker.timepass,1,"_time")
+    session:spawn(api.worker.unwrapcmd,1,"_unwrap")
+    session:spawn(api.worker.unref,1,"_unref")
+    session:spawn(api.worker.spacendclean,1,"_startEndSpaceClean")
     local laterscript = {}
     local skip = false
     for i, v in ipairs(arg) do
