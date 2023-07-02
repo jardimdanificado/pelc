@@ -14,7 +14,6 @@
 ## plec - Standard Library(lib.std)
 
 - `help` : list all loaded commands
-
 - `clear` : clear terminal
 - `pause` : send the user to api.run()
 - `echo string` : print text and return it
