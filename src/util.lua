@@ -1,24 +1,24 @@
-local api = {}
+local util = {}
 
-api.char = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'W', 'V', 'X', 'Y', 'Z', 'ç', 'Ç', 'ã', 'â', 'Â', 'Ã', 'á', 'à', 'Á', 'À', 'ä', 'Ä', 'ê', 'Ê', 'é', 'É', 'è', 'È', 'ë', 'Ë', 'î', 'Î', 'ï', 'Ï', 'í', 'Í', 'ì', 'Ì', 'õ', 'Õ', 'ô', 'Ô', 'ó', 'Ó', 'ò', 'Ò', 'ö', 'Ö', 'ú', 'Ú', 'ù', 'Ù', 'û', 'Û', 'ü', 'Ü', 'ñ', 'Ñ'}
-api.math = {}
-api.string = {}
-api.array = {}
-api.table = {}
-api.matrix = {}
-api.file = {}
-api.file.save = {}
-api.file.load = {}
-api.func = {}
-api.console = {}
-api.array.unpack = unpack or table.unpack
+util.char = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P','Q', 'R', 'S', 'T', 'U', 'W', 'V', 'X', 'Y', 'Z', 'ç', 'Ç', 'ã', 'â', 'Â', 'Ã', 'á', 'à', 'Á', 'À', 'ä', 'Ä', 'ê', 'Ê', 'é', 'É', 'è', 'È', 'ë', 'Ë', 'î', 'Î', 'ï', 'Ï', 'í', 'Í', 'ì', 'Ì', 'õ', 'Õ', 'ô', 'Ô', 'ó', 'Ó', 'ò', 'Ò', 'ö', 'Ö', 'ú', 'Ú', 'ù', 'Ù', 'û', 'Û', 'ü', 'Ü', 'ñ', 'Ñ'}
+util.math = {}
+util.string = {}
+util.array = {}
+util.table = {}
+util.matrix = {}
+util.file = {}
+util.file.save = {}
+util.file.load = {}
+util.func = {}
+util.console = {}
+util.array.unpack = unpack or table.unpack
 
-api.math.regrad3 = function(a, b, d)
+util.math.regrad3 = function(a, b, d)
     local c = (a * d) / b
     return c
 end
 
-api.math.scale = function(value, min, max)
+util.math.scale = function(value, min, max)
     if (value > max) then
         while (value > max) do
             value = value - max - min
@@ -29,53 +29,53 @@ api.math.scale = function(value, min, max)
             value = value + (max - min)
         end
     end
-    value = api.math.regrad3(max - min, 100, value - min)
+    value = util.math.regrad3(max - min, 100, value - min)
     return value;
 end
 
-api.math.vec2 = function(x, y)
+util.math.vec2 = function(x, y)
     return {
         x = x,
         y = y
     }
 end
 
-api.math.vec2add = function(vec0, vec1)
+util.math.vec2add = function(vec0, vec1)
     return {
         x = vec0.x + vec1.x,
         y = vec0.y + vec1.y
     }
 end
 
-api.math.vec2sub = function(vec0, vec1)
+util.math.vec2sub = function(vec0, vec1)
     return {
         x = vec0.x - vec1.x,
         y = vec0.y - vec1.y
     }
 end
 
-api.math.vec2div = function(vec0, vec1)
+util.math.vec2div = function(vec0, vec1)
     return {
         x = vec0.x / vec1.x,
         y = vec0.y / vec1.y
     }
 end
 
-api.math.vec2mod = function(vec0, vec1)
+util.math.vec2mod = function(vec0, vec1)
     return {
         x = vec0.x % vec1.x,
         y = vec0.y % vec1.y
     }
 end
 
-api.math.vec2mul = function(vec0, vec1)
+util.math.vec2mul = function(vec0, vec1)
     return {
         x = vec0.x * vec1.x,
         y = vec0.y * vec1.y
     }
 end
 
-api.math.vec3 = function(x, y, z)
+util.math.vec3 = function(x, y, z)
     return {
         x = x,
         y = y,
@@ -83,7 +83,7 @@ api.math.vec3 = function(x, y, z)
     }
 end
 
-api.math.vec3add = function(vec0, vec1)
+util.math.vec3add = function(vec0, vec1)
     return {
         x = vec0.x + vec1.x,
         y = vec0.y + vec1.y,
@@ -91,7 +91,7 @@ api.math.vec3add = function(vec0, vec1)
     }
 end
 
-api.math.vec3sub = function(vec0, vec1)
+util.math.vec3sub = function(vec0, vec1)
     return {
         x = vec0.x - vec1.x,
         y = vec0.y - vec1.y,
@@ -99,7 +99,7 @@ api.math.vec3sub = function(vec0, vec1)
     }
 end
 
-api.math.vec3mul = function(vec0, vec1)
+util.math.vec3mul = function(vec0, vec1)
     return {
         x = vec0.x * vec1.x,
         y = vec0.y * vec1.y,
@@ -107,7 +107,7 @@ api.math.vec3mul = function(vec0, vec1)
     }
 end
 
-api.math.vec3div = function(vec0, vec1)
+util.math.vec3div = function(vec0, vec1)
     return {
         x = vec0.x / vec1.x,
         y = vec0.y / vec1.y,
@@ -115,7 +115,7 @@ api.math.vec3div = function(vec0, vec1)
     }
 end
 
-api.math.vec3mod = function(vec0, vec1)
+util.math.vec3mod = function(vec0, vec1)
     return {
         x = vec0.x % vec1.x,
         y = vec0.y % vec1.y,
@@ -123,7 +123,7 @@ api.math.vec3mod = function(vec0, vec1)
     }
 end
 
-api.math.limit = function(value, min, max)
+util.math.limit = function(value, min, max)
     local range = max - min
     if range <= 0 then
         return min
@@ -132,7 +132,7 @@ api.math.limit = function(value, min, max)
     return offset + min + (offset < 0 and range or 0)
 end
 
-api.math.rotate = function(position, pivot, angle)
+util.math.rotate = function(position, pivot, angle)
     -- convert angle to radians
     angle = math.rad(angle)
 
@@ -141,7 +141,7 @@ api.math.rotate = function(position, pivot, angle)
     local c = math.cos(angle)
 
     -- translate position so that pivot is at the origin
-    local translated = api.math.vec3sub(position, pivot)
+    local translated = util.math.vec3sub(position, pivot)
 
     -- apply rotation
     local rotated = {
@@ -151,14 +151,14 @@ api.math.rotate = function(position, pivot, angle)
     }
 
     -- translate back to original position
-    return api.math.vec3add(rotated, {
+    return util.math.vec3add(rotated, {
         x = pivot.x,
         y = 0,
         z = pivot.z
     })
 end
 
-api.string.split = function(str, separator)
+util.string.split = function(str, separator)
     local parts = {}
     local start = 1
     separator = separator or ''
@@ -178,26 +178,26 @@ api.string.split = function(str, separator)
     return parts
 end
 
-api.string.replace = function(inputString, oldSubstring, newSubstring)
+util.string.replace = function(inputString, oldSubstring, newSubstring)
     newSubstring = newSubstring or ''
     return inputString:gsub(oldSubstring, newSubstring)
 end
 
-api.string.includes = function(str, substring)
+util.string.includes = function(str, substring)
     return string.find(str, substring, 1, true) ~= nil
 end
 
-api.string.trim = function(s)
+util.string.trim = function(s)
     return s:gsub("^%s+", ""):gsub("%s+$", "")
 end
 
-api.table.assign = function(obj1, obj2)
+util.table.assign = function(obj1, obj2)
     for k, v in pairs(obj2) do
         obj1[k] = obj2[k]
     end
 end
 
-api.table.len = function(obj)
+util.table.len = function(obj)
     local count = 0
     for k, v in pairs(obj) do
         count = count + 1
@@ -205,55 +205,55 @@ api.table.len = function(obj)
     return count
 end
 
-api.table.add = function(arr1, arr2)
+util.table.add = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] + arr2[k]
         end
     end
 end
 
-api.table.sub = function(arr1, arr2)
+util.table.sub = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] - arr2[k]
         end
     end
 end
 
-api.table.mul = function(arr1, arr2)
+util.table.mul = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] * arr2[k]
         end
     end
 end
 
-api.table.div = function(arr1, arr2)
+util.table.div = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] / arr2[k]
         end
     end
 end
 
-api.table.mod = function(arr1, arr2)
+util.table.mod = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] % arr2[k]
         end
     end
 end
 
-api.table.sub = function(arr1, arr2)
+util.table.sub = function(arr1, arr2)
     for k, v in pairs(arr2) do
-        if api.array.includes(api.reserved, k) then
+        if util.array.includes(util.reserved, k) then
             arr1[k] = arr2[k] - arr2[k]
         end
     end
 end
 
-api.array.slice = function(arr, start, final)
+util.array.slice = function(arr, start, final)
     local sliced_array = {}
     for i = start, final do
         table.insert(sliced_array, arr[i])
@@ -261,7 +261,7 @@ api.array.slice = function(arr, start, final)
     return sliced_array
 end
 
-api.array.organize = function(arr, parts)
+util.array.organize = function(arr, parts)
     local columns, rows = parts, parts
     local matrix = {}
     for i = 1, rows do
@@ -275,7 +275,7 @@ api.array.organize = function(arr, parts)
     return matrix
 end
 
-api.array.expand = function(matrix)
+util.array.expand = function(matrix)
     local nSubMatrices = #matrix
     local subMatrixSize = #matrix[1]
 
@@ -296,7 +296,7 @@ api.array.expand = function(matrix)
     return result
 end
 
-api.array.new = function(size, value)
+util.array.new = function(size, value)
     local result = {}
     value = value or 0
     for i = 1, size do
@@ -305,7 +305,7 @@ api.array.new = function(size, value)
     return result
 end
 
-api.array.keys = function(arr)
+util.array.keys = function(arr)
     local result = {
         insert = table.insert
     }
@@ -315,17 +315,17 @@ api.array.keys = function(arr)
     return result
 end
 
-api.array.random = function(start, fim, size)
+util.array.random = function(start, fim, size)
     local result = {}
     local range = fim - start + 1
     for i = 0, i < size do
-        local randomInt = math.floor(api.random() * range) + start
+        local randomInt = math.floor(util.random() * range) + start
         result.push(randomInt)
     end
     return result
 end
 
-api.array.minmax = function(arr)
+util.array.minmax = function(arr)
     local min = arr[1]
     local max = arr[1]
     for y = 1, #arr do
@@ -341,7 +341,7 @@ api.array.minmax = function(arr)
     }
 end
 
-api.array.sum = function(arr)
+util.array.sum = function(arr)
     local sum = 0
     for i = 1, #arr, 1 do
         sum = sum + arr[i]
@@ -349,7 +349,7 @@ api.array.sum = function(arr)
     return sum
 end
 
-api.array.map = function(arr, callback)
+util.array.map = function(arr, callback)
     local result = {}
     for i = 1, #arr do
         result[i] = callback(arr[i], i)
@@ -357,7 +357,7 @@ api.array.map = function(arr, callback)
     return result
 end
 
-api.array.filter = function(arr, callback)
+util.array.filter = function(arr, callback)
     local result = {}
     local names = {}
     for k, v in pairs(arr) do
@@ -369,7 +369,7 @@ api.array.filter = function(arr, callback)
     return result, names
 end
 
-api.array.reduce = function(arr, callback, initial)
+util.array.reduce = function(arr, callback, initial)
     local accumulator = initial
     for i = 1, #arr do
         accumulator = callback(accumulator, arr[i])
@@ -377,7 +377,7 @@ api.array.reduce = function(arr, callback, initial)
     return accumulator
 end
 
-api.array.includes = function(arr, value)
+util.array.includes = function(arr, value)
     for k, v in pairs(arr) do
         if (value == v) then
             return true
@@ -386,7 +386,7 @@ api.array.includes = function(arr, value)
     return false
 end
 
-api.array.tostring = function(arr)
+util.array.tostring = function(arr)
     local result = ''
     for i, v in ipairs(arr) do
         result = result .. ' ' .. v
@@ -394,7 +394,7 @@ api.array.tostring = function(arr)
     return result
 end
 
-api.matrix.includes = function(matrix, value)
+util.matrix.includes = function(matrix, value)
     for k, v in pairs(matrix) do
         for k, v in pairs(v) do
             if (value == v) then
@@ -405,7 +405,7 @@ api.matrix.includes = function(matrix, value)
     return false
 end
 
-api.matrix.new = function(sizex, sizey, sizez, value)
+util.matrix.new = function(sizex, sizey, sizez, value)
     local result = {}
     for x = 1, sizex do
         result[x] = {}
@@ -423,7 +423,7 @@ api.matrix.new = function(sizex, sizey, sizez, value)
     return result
 end
 
-api.matrix.tostring = function(matrix)
+util.matrix.tostring = function(matrix)
     local str = ''
     for x = 1, #matrix, 1 do
         for y = 1, #matrix[x], 1 do
@@ -434,7 +434,7 @@ api.matrix.tostring = function(matrix)
     return str
 end
 
-api.matrix.minmax = function(matrix)
+util.matrix.minmax = function(matrix)
     local min_val = matrix[1][1]
     local max_val = matrix[1][1]
     for i = 1, #matrix do
@@ -450,7 +450,7 @@ api.matrix.minmax = function(matrix)
     return min_val, max_val
 end
 
-api.matrix.unique = function(matrix)
+util.matrix.unique = function(matrix)
     function contains(table, val)
         for i = 1, #table do
             if table[i] == val then
@@ -471,7 +471,7 @@ api.matrix.unique = function(matrix)
     return unique_vals
 end
 
-api.matrix.average = function(matrix)
+util.matrix.average = function(matrix)
     local sum, count = 0, 0
     for x = 1, #matrix do
         for y = 1, #matrix[x] do
@@ -482,7 +482,7 @@ api.matrix.average = function(matrix)
     return (sum / count)
 end
 
-api.matrix.map = function(matrix, callback)
+util.matrix.map = function(matrix, callback)
     for x = 1, #matrix do
         for y = 1, #matrix[x] do
             matrix[x][y] = callback(matrix[x][y])
@@ -491,7 +491,7 @@ api.matrix.map = function(matrix, callback)
     return matrix
 end
 
-api.matrix.reduce = function(matrix, callback, initialValue)
+util.matrix.reduce = function(matrix, callback, initialValue)
     local accumulator = initialValue
     for x = 1, #matrix do
         for y = 1, #matrix[x] do
@@ -501,7 +501,7 @@ api.matrix.reduce = function(matrix, callback, initialValue)
     return accumulator
 end
 
-api.matrix.filter = function(matrix, callback)
+util.matrix.filter = function(matrix, callback)
     local filtered = {}
     for x = 1, #matrix do
         filtered[x] = {}
@@ -514,32 +514,32 @@ api.matrix.filter = function(matrix, callback)
     return filtered
 end
 
-api.func.time = function(func, ...)
+util.func.time = function(func, ...)
     local name = 'noname'
     if type(func) == 'table' then
         func, name = func[1], func[2]
     end
     local tclock = os.clock()
-    local result = func(api.array.unpack({...}))
+    local result = func(util.array.unpack({...}))
     tclock = os.clock() - tclock
     print(name .. ": " .. tclock .. " seconds")
     return result, tclock
 end
 
-api.file.load.text = function(path)
+util.file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file:read("*all")
     file:close()
     return contents
 end
 
-api.file.save.text = function(path, text)
+util.file.save.text = function(path, text)
     local file = io.open(path, "w")
     file:write(text)
     file:close()
 end
 
-api.file.save.intMap = function(filename, matrix)
+util.file.save.intMap = function(filename, matrix)
     local file = io.open(filename, "w")
     local max = 0
     for i = 1, #matrix do
@@ -563,7 +563,7 @@ api.file.save.intMap = function(filename, matrix)
     file:close()
 end
 
-api.file.save.charMap = function(filename, matrix)
+util.file.save.charMap = function(filename, matrix)
     local file = io.open(filename, "w")
     for x = 1, #matrix, 1 do
         for y = 1, #matrix[x], 1 do
@@ -579,7 +579,7 @@ api.file.save.charMap = function(filename, matrix)
     file:close()
 end
 
-api.file.load.charMap = function(filename)
+util.file.load.charMap = function(filename)
     local file = io.open(filename, "r")
     local matrix = {}
     for line in file:lines() do
@@ -593,12 +593,12 @@ api.file.load.charMap = function(filename)
     return matrix
 end
 
-api.file.load.map = function(filepath)
-    local text = api.file.load.text(filepath)
-    local spl = api.string.split(text, "\n")
+util.file.load.map = function(filepath)
+    local text = util.file.load.text(filepath)
+    local spl = util.string.split(text, "\n")
     local result = {}
     for x, v in spl do
-        v = api.string.split(v, " ")
+        v = util.string.split(v, " ")
         result[x] = {}
         for y, l in ipairs(v) do
             result[x][y] = l
@@ -607,7 +607,7 @@ api.file.load.map = function(filepath)
     return result
 end
 
-api.file.exist = function(path)
+util.file.exist = function(path)
     local file = io.open(path, "r")
     if file then
         file:close()
@@ -617,12 +617,12 @@ api.file.exist = function(path)
     end
 end
 
-api.file.isFile = function(path)
+util.file.isFile = function(path)
     local mode = lfs.attributes(path, "mode")
     return mode == "file"
 end
 
-api.file.check = function(path)
+util.file.check = function(path)
     local file = io.open(path, "r")
     if file then
         local info = file:read("*a")
@@ -639,20 +639,20 @@ end
 
 randi = randi or 1
 
-api.random = function(min, max)
+util.random = function(min, max)
     math.randomseed(os.time() + randi)
     randi = randi + math.random(1, 40)
     return math.random(min, max)
 end
 
-api.roleta = function(...)
+util.roleta = function(...)
     local odds = {...}
     local total = 0
     for i = 1, #odds do
         total = total + odds[i]
     end
 
-    local random_num = api.random(1, total)
+    local random_num = util.random(1, total)
     local sum = 0
     for i = 1, #odds do
         sum = sum + odds[i]
@@ -662,21 +662,21 @@ api.roleta = function(...)
     end
 end
 
-api.id = function(charTable)
-    charTable = charTable or api.char
+util.id = function(charTable)
+    charTable = charTable or util.char
     local tablelen = #charTable
-    local numbers  = api.string.replace(os.clock() .. os.time(), '%.', '')
-    numbers = api.string.split(numbers, '')
+    local numbers  = util.string.replace(os.clock() .. os.time(), '%.', '')
+    numbers = util.string.split(numbers, '')
     local result = ""
     for i = 1, #numbers do
         -- print 'a'
         result = result .. numbers[i]
-        result = result .. charTable[api.random(1, tablelen)]
+        result = result .. charTable[util.random(1, tablelen)]
     end
     return result
 end
 
-api.turn = function(bool)
+util.turn = function(bool)
     if bool == false then
         return true
     else
@@ -684,9 +684,9 @@ api.turn = function(bool)
     end
 end
 
-api.load = loadstring or load
+util.load = loadstring or load
 
-api.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows return ifWindows, if no args return true if is unix
+util.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows return ifWindows, if no args return true if is unix
     ifUnix = ifUnix or true
     ifWindows = ifWindows or false
     if package.config:sub(1, 1) == '\\' then
@@ -696,7 +696,7 @@ api.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows ret
     end
 end
 
-api.stringify = function(obj, indent)
+util.stringify = function(obj, indent)
     if obj == nil then
         return ''
     end
@@ -737,4 +737,4 @@ api.stringify = function(obj, indent)
     return str
 end
 
-return api
+return util
