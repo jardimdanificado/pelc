@@ -394,6 +394,21 @@ util.array.tostring = function(arr)
     return result
 end
 
+util.array.clear = function(arr)
+    local result = {}
+    local index = 1
+  
+    for i = 1, #arr do
+      if arr[i] ~= nil then
+        result[index] = arr[i]
+        index = index + 1
+      end
+    end
+  
+    return result
+  end
+  
+
 util.matrix.includes = function(matrix, value)
     for k, v in pairs(matrix) do
         for k, v in pairs(v) do
