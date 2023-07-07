@@ -325,6 +325,19 @@ util.array.random = function(start, fim, size)
     return result
 end
 
+util.array.clone = function(obj)
+    if type(obj) ~= "table" then
+      return obj
+    end
+  
+    local clone = {}
+    for key, value in pairs(obj) do
+      clone[key] = util.array.clone(value)
+    end
+  
+    return clone
+end
+
 util.array.minmax = function(arr)
     local min = arr[1]
     local max = arr[1]
@@ -406,7 +419,7 @@ util.array.clear = function(arr)
     end
   
     return result
-  end
+end
   
 
 util.matrix.includes = function(matrix, value)
@@ -748,7 +761,6 @@ util.stringify = function(obj, indent)
         -- Handle other types
         str = tostring(obj)
     end
-
     return str
 end
 

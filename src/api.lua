@@ -65,21 +65,22 @@ api.run = function(session, command)
     command = command or io.read()
     local result = ''
     for i, cmd in ipairs(api.console.formatcmd(command)) do
-        for k, worker in pairs(session.preworker) do
+        for k, worker in pairs(session.pre_worker) do
             cmd = api.work(session,worker,cmd)
             if session.temp.wskip or session.temp.skip then
                 break
             end
         end
-        if not session.temp.skip or not session.temp.lskip then
-            local split = api.string.split(cmd, " ")
+        session.temp.cmdname = api.string.split(cmd,"%s+")[1]
+        if not session.temp.skip or not session.temp.cskip then
+            split = api.string.split(cmd, " ")
             local args = {}
             for i = 2, #split, 1 do
                 table.insert(args,split[i])
             end
             result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd)
         end
-        for k, worker in pairs(session.postworker) do
+        for k, worker in pairs(session.post_worker) do
             cmd = api.work(session,worker,cmd)
             if session.temp.wskip or session.temp.skip then
                 break
@@ -93,16 +94,16 @@ api.spawn = function(session,name,position,newid)
     local worker = session.data.worker[name]
     if type(position) == "string" then
         newid = position
-        position = worker.position == 'pre' and #session.preworker+1 or #session.postworker+1
+        position = worker.position == 'pre' and #session.pre_worker+1 or #session.post_worker+1
     elseif not position then
-        position = worker.position == 'pre' and #session.preworker+1 or #session.postworker+1
+        position = worker.position == 'pre' and #session.pre_worker+1 or #session.post_worker+1
     end
     
     worker.id = name or newid
     if worker.position == 'post' then
-        table.insert(session.postworker,position,worker)
+        table.insert(session.post_worker,position,worker)
     else
-        table.insert(session.preworker,position,worker)        
+        table.insert(session.pre_worker,position,worker)        
     end
     return worker
 end
@@ -114,7 +115,7 @@ api.loadcmds = function(session,templib)
     end
     for k, v in pairs(templib.cmd) do
         session.data.cmd[k] = v
-        session.cmd[k] = v
+        session.cmd[k] = session.data.cmd[k]
     end
     for k, worker in pairs(templib.worker) do
         if type(worker) == 'function' then
@@ -154,8 +155,101 @@ api.new = {
     session = function()
         local session = 
         {
-            data = {cmd={},worker=
+            data = 
+            {
+                cmd =
                 {
+                    run = function(session,args)
+                        api.run(session,api.file.load.text(args[1]))
+                    end,
+                    require = function(session,args)
+                        local templib
+                        for k, v in pairs(args) do
+                            if not api.string.includes(args[k],'lib.') and not api.string.includes(args[k],'/') and not api.string.includes(args[k],'\\') then
+                                templib = require('lib.' .. args[k])
+                            else
+                                templib = require(
+                                    api.string.replace(
+                                        api.string.replace(
+                                            api.string.replace(args[k],'.lua',''),'/','.'),'\\','.'))
+                            end
+                        end
+                        
+                        api.loadcmds(session,templib)
+                    end,
+                    import = function(session,args)
+                        if not api.file.exist(args[1]) then
+                            return
+                        end
+                        api.loadcmds(session,dofile(args[1]))
+                    end,
+                    ['--'] = function() end,
+                    set = function(session,args, cmd)
+                        local finalargs = {}
+                        for i = 2, 1, -1 do
+                            table.insert(finalargs, args[i])
+                        end
+                        session.data[args[1]] = session.api.array.unpack(finalargs)
+                        local newcmd = cmd:gsub(args[1] .. ' ', '')
+                        newcmd = newcmd:gsub("set ", '')
+                        if args[2] == 'true' or args[2] == 'false' then
+                            session.data[args[1]] = args[2] == true and true or false
+                        elseif tonumber(newcmd) then
+                            session.data[args[1]] = tonumber(newcmd)
+                        else
+                            session.data[args[1]] = newcmd
+                        end
+                    end,
+                    def = function(session,args,cmd)
+                        session.cmd[args[1]] = (session.api.load("return function(session,args,cmd) " .. cmd:gsub('def '.. args[1] ,'',1) .. ' end'))()
+                    end,
+                    load = function(session,args)
+                        if not session.data.cmd[args[1]] then
+                            print(args[1] .. ' command does not exist.')
+                        end
+                        session.cmd[args[1]] = session.data.cmd[args[1]]
+                    end,
+                    autodef = function(session,args,cmd)
+                        session.data.cmd[args[1]] = (session.api.load("return function(session,args,cmd) " .. cmd:gsub('autodef '.. args[1] ,'',1) .. ' end'))()
+                        session.cmd[args[1]] = session.data.cmd[args[1]]
+                    end,
+                    [">"] = function(session,args, cmd)
+                        local result = session.api.load('return ' .. cmd:gsub('> ','')) or function() end
+                        result = result() or ''
+                        return result
+                    end,
+                },
+                worker=
+                {
+                    ['='] = 
+                    {
+                        id = "=",
+                        timer = 1,
+                        position = "pre",
+                        func = function(session, cmd)
+                            local split = api.string.split(cmd," ")
+                            if split[2] == '=' then
+                                cmd = cmd:gsub("=",' = ')
+                                cmd = cmd:gsub("%s+=%s+",' ')
+                                cmd = "set " .. cmd
+                            end
+                            return cmd
+                        end
+                    },
+                    ['=>'] = 
+                    {
+                        id = "=>",
+                        timer = 1,
+                        position = "pre",
+                        func = function(session, cmd)
+                            local split = api.string.split(cmd," ")
+                            if split[2] == '=>' then
+                                cmd = cmd:gsub("=>",'')
+                                cmd = "def " .. cmd
+                            end
+                            return cmd
+                        end
+                    },
                     unref =
                     {
                         id = "unref",
@@ -172,7 +266,13 @@ api.new = {
                                     table.insert(links,link)
                                 end
                                 for i, link in ipairs(links) do
-                                    cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
+                                    if session.data[link:gsub('&','')] then
+                                        cmd = cmd:gsub(link,api.stringify(session.data[link:gsub('&','')]))
+                                    else
+                                        print(link .. ' has no value.')
+                                        session.temp.skip = true
+                                    end
+                                    
                                 end
                             end
                             return cmd
@@ -221,7 +321,7 @@ api.new = {
                         timer = 1,
                         position = 'pre',
                         func = function(session,cmd)
-                            session.temp.cmdname = api.string.split(cmd,'%s+')[1]
+                            session.temp.cmdname = session.temp.cmdname or api.string.split(cmd,'%s+')[1]
                             if not session.cmd[session.temp.cmdname] then
                                 if session.data.worker[session.temp.cmdname] then
                                     print(session.temp.cmdname .. ' command exist but is not loaded!')
@@ -234,45 +334,23 @@ api.new = {
                     }
                 }
             },
-            preworker = {},
-            postworker = {},
+            pre_worker = {},
+            post_worker = {},
             temp = {},
             run = api.run,
             spawn = api.spawn,
-            exit = false,
             time = 0,
             api = api,
-            cmd = 
-            {
-                run = function(session,args)
-                    api.run(session,api.file.load.text(args[1]))
-                end,
-                require = function(session,args)
-                    local templib
-                    if not api.string.includes(args[1],'lib.') and not api.string.includes(args[1],'/') and not api.string.includes(args[1],'\\') then
-                        templib = require('lib.' .. args[1])
-                    else
-                        templib = require(
-                            api.string.replace(
-                                api.string.replace(
-                                    api.string.replace(args[1],'.lua',''),'/','.'),'\\','.'))
-                    end
-                    api.loadcmds(session,templib)
-                end,
-                import = function(session,args)
-                    if not api.file.exist(args[1]) then
-                        return
-                    end
-                    api.loadcmds(session,dofile(args[1]))
-                end,
-                ['--'] = function() end
-            }
+            cmd = {}
         }
+        session.cmd = api.array.clone(session.data.cmd)
         return session
     end
 }
 
 api.start = function(session)
+    session:spawn("=>","_=>")
+    session:spawn("=","_=")
     session:spawn("timepass","_time")
     session:spawn("unwrapcmd","_unwrap")
     session:spawn('unref',"_unref")

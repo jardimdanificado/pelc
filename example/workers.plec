@@ -1,0 +1,8 @@
+require std;
+require worker;
+w = worker;
+&w.help;
+&w.lhelp;
+&w.despawn 1;
+&w.help;
+exit
