@@ -30,4 +30,4 @@
 
 - `&variable` : is replaced by the _variable_ value
 - `!(command)!` : run _command_ on plec layer
-- ` ; ` : separate finish the command and start another
+- `;` : separate finish the command and start another
