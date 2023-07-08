@@ -1,4 +1,4 @@
-local std = {cmd = {},worker = {}}
+local std = {cmd = {},step = {}}
 
 std.cmd['$'] = function(session,args,cmd)
     local lcmd = 'os.execute("' .. session.api.string.replace(cmd, "%$")  .. '")'

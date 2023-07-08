@@ -16,10 +16,11 @@
 - `load` : load a existing cmd to session.
 - `> lua-code` : solve a lua code
 
-## plec - Built-In Workers
+## plec - Built-In steps
 
-- `=` : turn _varname_ = _any1_ to set _varname_ _any1_
-- `=>` : turn _functioname_ => _any1_ to def _functioname_ _any1_
+- `=` : turn _varname_ = _any1_ into set _varname_ _any1_
+- `=>` : turn _functioname_ => _any1_ into def _functioname_ _any1_
+- `@` : turn _@ref_ into _&ref_
 - `unref` : turn _&any_ into its setted value, or replace by '' if no value set
 - `unwrapcmd` : turn _!(any)!_ into session:run('any') result
 - `spacendclean` : remove all spaces on start and end of command
@@ -30,9 +31,9 @@
 
 - `session.temp.exit` : responsible for exiting repl or keep in loop
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
-- `session.temp.wskip` : skip remaining workers
-- `session.temp.cskip` : prevent command from running but run all workers
-- `session.temp.skip` : skip both remaining workers and command
+- `session.temp.wskip` : skip remaining steps
+- `session.temp.cskip` : prevent command from running but run all steps
+- `session.temp.skip` : skip both remaining steps and command
 
 ## plec - Standard Library(lib.std)
 
@@ -47,14 +48,15 @@
 - `exit` : quit, but complete the current loop
 - `terminate` : force quit, terminate the process
 
-## plec - Worker library(lib.worker)
+## plec - step library(lib.step)
 
-- `worker.spawn id position newid` : spawn a loaded worker, only _id_ is obligatory
-- `worker.help` : list all spawned workers
-- `worker.lhelp` : list all loaded workers
+- `step.add id position newid` : sadd a loaded step, only _id_ is obligatory
+- `step.rm p` : remove step ate _p_ position
+- `step.help` : list all sadded steps
+- `step.lhelp` : list all loaded steps
 
 ## plec - Syntax
 
 - `&variable` : is replaced by the _variable_ value
 - `!(command)!` : run _command_ on plec layer
-- `;` : separate finish the command and start another
+- `;` : separate commands, finish the command and start a new one

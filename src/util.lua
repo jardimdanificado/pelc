@@ -665,6 +665,35 @@ util.file.check = function(path)
     end
 end
 
+util.console.colors = 
+{
+    black = '\27[30m',
+    reset = '\27[0m',
+    red = '\27[31m',
+    green = '\27[32m',
+    yellow = '\27[33m',
+    blue = '\27[34m',
+    magenta = '\27[35m',
+    cyan = '\27[36m',
+    white = '\27[37m',
+}
+
+util.console.colorstring = function(str,color)
+    return util.console.colors[color] .. str .. util.console.colors.reset
+end
+
+util.console.boldstring = function(str)
+    return "\27[1m" .. str .. "\27[0m"
+end
+
+util.console.randomcolor = function()
+    return util.console.colors[util.console.util.random(3,#util.console.colors)]--ignores black and reset
+end
+
+util.console.movecursor = function(x, y)
+    return io.write("\27[" .. x .. ";" .. y .. "H")
+end
+
 randi = randi or 1
 
 util.random = function(min, max)

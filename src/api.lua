@@ -1,6 +1,6 @@
 local api = require('src.util')
 
-api.console.formatcmd = function(command)
+api.formatcmd = function(command)
     command = command:gsub("%s+", " ")
     command = command:gsub('; ', ';')
     command = command:gsub(' ;', ';')
@@ -10,35 +10,6 @@ api.console.formatcmd = function(command)
     return api.string.split(command, ';')
 end
 
-api.console.colors = 
-{
-    black = '\27[30m',
-    reset = '\27[0m',
-    red = '\27[31m',
-    green = '\27[32m',
-    yellow = '\27[33m',
-    blue = '\27[34m',
-    magenta = '\27[35m',
-    cyan = '\27[36m',
-    white = '\27[37m',
-}
-
-api.console.colorstring = function(str,color)
-    return api.console.colors[color] .. str .. api.console.colors.reset
-end
-
-api.console.boldstring = function(str)
-    return "\27[1m" .. str .. "\27[0m"
-end
-
-api.console.randomcolor = function()
-    return api.console.colors[api.console.api.random(3,#api.console.colors)]--ignores black and reset
-end
-
-api.console.movecursor = function(x, y)
-    return io.write("\27[" .. x .. ";" .. y .. "H")
-end
-
 api.getlink =  function(str)
     local pattern = "&(%w+)"
     local match = string.match(str, pattern)
@@ -46,70 +17,35 @@ api.getlink =  function(str)
     return ('&' .. match), result
 end
 
-api.work = function(session,worker,cmd)
-    if session.time % worker.timer == 0 then
-        local tmp = worker.func(session,cmd,worker)
+api.stepin = function(session,step,cmd)
+    if session.time % step.timer == 0 then
+        local tmp = step.func(session,cmd,step)
         cmd = type(tmp) == "string" and tmp or cmd
         return cmd
     end
     return cmd
 end
 
-api.run = function(session, command)
-    if not session.temp.keep then        
-        session.temp = {}
-    else
-        session.temp.keep = false
-    end
-
-    command = command or io.read()
-    local result = ''
-    for i, cmd in ipairs(api.console.formatcmd(command)) do
-        for k, worker in pairs(session.pre_worker) do
-            cmd = api.work(session,worker,cmd)
-            if session.temp.wskip or session.temp.skip then
-                break
-            end
-        end
-        session.temp.cmdname = api.string.split(cmd,"%s+")[1]
-        if not session.temp.skip or not session.temp.cskip then
-            split = api.string.split(cmd, " ")
-            local args = {}
-            for i = 2, #split, 1 do
-                table.insert(args,split[i])
-            end
-            result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd)
-        end
-        for k, worker in pairs(session.post_worker) do
-            cmd = api.work(session,worker,cmd)
-            if session.temp.wskip or session.temp.skip then
-                break
-            end
-        end
-    end
-    return result
-end
-
-api.spawn = function(session,name,position,newid) 
-    local worker = session.data.worker[name]
+api.sadd = function(session,name,position,newid) 
+    local step = session.data.step[name]
     if type(position) == "string" then
         newid = position
-        position = worker.position == 'pre' and #session.pre_worker+1 or #session.post_worker+1
+        position = step.position == 'pre' and #session.pre_step+1 or #session.post_step+1
     elseif not position then
-        position = worker.position == 'pre' and #session.pre_worker+1 or #session.post_worker+1
+        position = step.position == 'pre' and #session.pre_step+1 or #session.post_step+1
     end
     
-    worker.id = name or newid
-    if worker.position == 'post' then
-        table.insert(session.post_worker,position,worker)
+    step.id = name or newid
+    if step.position == 'post' then
+        table.insert(session.post_step,position,step)
     else
-        table.insert(session.pre_worker,position,worker)        
+        table.insert(session.pre_step,position,step)        
     end
-    return worker
+    return step
 end
 
 api.loadcmds = function(session,templib)
-    templib.worker = templib.worker or {}
+    templib.step = templib.step or {}
     if templib.preload ~= nil then
         templib.preload(session)
     end
@@ -117,25 +53,25 @@ api.loadcmds = function(session,templib)
         session.data.cmd[k] = v
         session.cmd[k] = session.data.cmd[k]
     end
-    for k, worker in pairs(templib.worker) do
-        if type(worker) == 'function' then
-            local _worker = 
+    for k, step in pairs(templib.step) do
+        if type(step) == 'function' then
+            local _step = 
             {
-                id = templib.worker[k .. '_id'] or k,
-                timer = templib.worker[k .. '_timer'] or 1,
-                position = templib.worker[k .. '_position'] or 'pre',
-                func = worker
+                id = templib.step[k .. '_id'] or k,
+                timer = templib.step[k .. '_timer'] or 1,
+                position = templib.step[k .. '_position'] or 'pre',
+                func = step
             }
-            session.data.worker[k] = _worker
-        elseif type(worker) == 'table' then
-            local _worker = 
+            session.data.step[k] = _step
+        elseif type(step) == 'table' then
+            local _step = 
             {
-                id = templib.worker.id or k,
-                timer = templib.worker.timer or 1,
-                position = templib.worker.position or 'pre',
-                func = worker.func
+                id = templib.step.id or k,
+                timer = templib.step.timer or 1,
+                position = templib.step.position or 'pre',
+                func = step.func
             }
-            session.data.worker[k] = _worker
+            session.data.step[k] = _step
         end
     end
     if templib.setup ~= nil then
@@ -144,17 +80,25 @@ api.loadcmds = function(session,templib)
 end
 
 api.new = {
-    worker = function(func,timer,position,id)
-        local worker = {}
-        worker.func = func
-        worker.timer = timer or 1
-        worker.position = position or 'pre'
-        worker.id = id or api.id()
-        return worker
+    step = function(func,timer,position,id)
+        local step = {}
+        step.func = func
+        step.timer = timer or 1
+        step.position = position or 'pre'
+        step.id = id or api.id()
+        return step
     end,
     session = function()
         local session = 
         {
+            pre_step = {},
+            post_step = {},
+            temp = {},
+            run = api.run,
+            sadd = api.sadd,
+            time = 0,
+            api = api,
+            cmd = {},
             data = 
             {
                 cmd =
@@ -165,23 +109,26 @@ api.new = {
                     require = function(session,args)
                         local templib
                         for k, v in pairs(args) do
-                            if not api.string.includes(args[k],'lib.') and not api.string.includes(args[k],'/') and not api.string.includes(args[k],'\\') then
-                                templib = require('lib.' .. args[k])
+                            if not api.string.includes(v,'lib.') and not api.string.includes(v,'/') and not api.string.includes(v,'\\') then
+                                templib = require('lib.' .. v)
                             else
                                 templib = require(
                                     api.string.replace(
                                         api.string.replace(
-                                            api.string.replace(args[k],'.lua',''),'/','.'),'\\','.'))
+                                            api.string.replace(v,'.lua',''),'/','.'),'\\','.'))
                             end
+                            api.loadcmds(session,templib)
                         end
                         
-                        api.loadcmds(session,templib)
                     end,
                     import = function(session,args)
-                        if not api.file.exist(args[1]) then
-                            return
+                        for k, v in pairs(args) do
+                            if not api.file.exist(v) then
+                                return
+                            end
+                            api.loadcmds(session,dofile(v))
                         end
-                        api.loadcmds(session,dofile(args[1]))
+                        
                     end,
                     ['--'] = function() end,
                     set = function(session,args, cmd)
@@ -219,7 +166,7 @@ api.new = {
                         return result
                     end,
                 },
-                worker=
+                step=
                 {
                     ['='] = 
                     {
@@ -323,7 +270,7 @@ api.new = {
                         func = function(session,cmd)
                             session.temp.cmdname = session.temp.cmdname or api.string.split(cmd,'%s+')[1]
                             if not session.cmd[session.temp.cmdname] then
-                                if session.data.worker[session.temp.cmdname] then
+                                if session.data.step[session.temp.cmdname] then
                                     print(session.temp.cmdname .. ' command exist but is not loaded!')
                                 else
                                     print(session.temp.cmdname .. ' command do not exist!')
@@ -331,31 +278,74 @@ api.new = {
                                 session.temp.skip = true
                             end
                         end
+                    },
+                    ["@"] = 
+                    {
+                        id = "@",
+                        timer = 1,
+                        position = 'pre',
+                        func = function(session,cmd)
+                            return cmd:gsub("%@","%&")
+                        end
                     }
                 }
-            },
-            pre_worker = {},
-            post_worker = {},
-            temp = {},
-            run = api.run,
-            spawn = api.spawn,
-            time = 0,
-            api = api,
-            cmd = {}
+            }
         }
         session.cmd = api.array.clone(session.data.cmd)
         return session
     end
 }
 
+api.getline = function()
+    io.write("> ")
+    local str = io.read()
+    return str
+end
+
+api.run = function(session, command)
+    if not session.temp.keep then        
+        session.temp = {}
+    else
+        session.temp.keep = false
+    end
+
+    command = command or api.getline()
+    local result = ''
+    for i, cmd in ipairs(api.formatcmd(command)) do
+        for k, step in pairs(session.pre_step) do
+            cmd = api.stepin(session,step,cmd)
+            if session.temp.wskip or session.temp.skip then
+                break
+            end
+        end
+        session.temp.cmdname = api.string.split(cmd,"%s+")[1]
+        if not session.temp.skip or not session.temp.cskip then
+            split = api.string.split(cmd, " ")
+            local args = {}
+            for i = 2, #split, 1 do
+                table.insert(args,split[i])
+            end
+            result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd)
+        end
+        for k, step in pairs(session.post_step) do
+            cmd = api.stepin(session,step,cmd)
+            if session.temp.wskip or session.temp.skip then
+                break
+            end
+        end
+    end
+    return result
+end
+
 api.start = function(session)
-    session:spawn("=>","_=>")
-    session:spawn("=","_=")
-    session:spawn("timepass","_time")
-    session:spawn("unwrapcmd","_unwrap")
-    session:spawn('unref',"_unref")
-    session:spawn("spacendclean","_removeStartAndEndSpaces")
-    session:spawn("segfault","_segFault")
+    session:sadd("=>","_=>")
+    session:sadd("=","_=")
+    session:sadd("@","_@")
+    session:sadd("timepass","_time")
+    session:sadd("unwrapcmd","_unwrap")
+    session:sadd('unref',"_unref")
+    session:sadd("spacendclean","_removeStartAndEndSpaces")
+    session:sadd("segfault","_segFault")
     local laterscript = {}
     local skip = false
     for i, v in ipairs(arg) do
