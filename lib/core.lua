@@ -93,7 +93,7 @@ core.step['=>'] =
         local split = session.api.string.split(cmd," ")
         if split[2] == '=>' then
             cmd = cmd:gsub("=>",'')
-            cmd = "def " .. cmd
+            cmd = "autodef " .. cmd
         end
         return cmd
     end
