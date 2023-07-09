@@ -743,7 +743,7 @@ end
 
 util.load = loadstring or load
 
-util.unix = function(ifUnix, ifWindows) -- returts ifunix if unix, if windows return ifWindows, if no args return true if is unix
+util.unix = function(ifUnix, ifWindows) -- returns ifunix if unix, if windows return ifWindows, if no args return true if is unix
     ifUnix = ifUnix or true
     ifWindows = ifWindows or false
     if package.config:sub(1, 1) == '\\' then

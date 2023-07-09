@@ -2,12 +2,13 @@ require std;
 help;
 set x 20;
 set y 7;
-set z !(> &x/10)!;
-echo &z;
-echo today is day !(> &x + &y)! of month !(> 3 * &z)!;
--- note that even in comments you can run code !($ ls)!;
-autodef abc
+set z ([> @x/([> 5 + 5])]);
+echo @z;
+echo today is day ([> @x + @y]) of month ([> 3 * @z]);
+-- note that even in comments you can run code ([$ ls]);
+def abc
     return 'example text showing a just defined command!';
-set a !(abc)!;
-echo &a;
+load abc;
+set a ([abc]);
+echo @a;
 exit; -- quits program

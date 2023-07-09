@@ -4,7 +4,7 @@ lib.cmd['step.add'] = function(session,args)
     if not session.data.step[args[1]] then
         print(args[1] .. ' command do not exist.')
     else
-        session:sadd(args[1], args[2], args[3])
+        session:stepadd(args[1], args[2], args[3])
     end
 end
 
@@ -30,12 +30,7 @@ lib.cmd["step.lhelp"] = function(session,args)
 end
 
 lib.cmd["step.rm"] = function(session,args)
-    if not args[2] then
-        args[2] = args[1]
-        args[1] = 'pre'
-    end
-    session[args[1] .. '_step'][tonumber(args[2])] = nil
-    session[args[1] .. '_step'] = session.api.array.clear(session[args[1] .. '_step'])
+    session:steprm(tonumber(args[1]) or args[1],tonumber(args[2]) or args[2])
 end
 
 return lib 

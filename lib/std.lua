@@ -1,4 +1,4 @@
-local std = {cmd = {},step = {}}
+local std = require("lib.core")
 
 std.cmd['$'] = function(session,args,cmd)
     local lcmd = 'os.execute("' .. session.api.string.replace(cmd, "%$")  .. '")'
@@ -13,15 +13,11 @@ std.cmd.pause = function(session,args)
     session:run()
 end
 
-std.cmd.exit = function(session,args)
-    session.temp.exit = true
-end
-
 std.cmd.terminate = function(session,args)
     os.exit()
 end
 
-std.cmd.echo = function(session,args) --unblocked
+std.cmd.echo = function(session,args)
     local txt = ''
     for i, v in ipairs(args) do
         txt = txt .. v .. ' '
@@ -29,8 +25,6 @@ std.cmd.echo = function(session,args) --unblocked
     print(txt)
     return txt
 end
-
-std.cmd.solve = std.cmd[">"]
 
 std.cmd.help = function(session,args)
     io.write("\27[32mAvaliable commands:\27[0m ")
