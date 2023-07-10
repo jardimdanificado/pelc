@@ -24,28 +24,26 @@ api.stepin = function(session,step,cmd)
 end
 
 api.stepadd = function(session,name,position,newid) 
-    local step = session.data.step[name]
+    local step = 
+    {
+        id = '',
+        func = session.data.step[name]
+    }
+
     if type(position) == "string" then
         newid = position
-        position = step.position == 'pre' and #session.pre_step+1 or #session.post_step+1
+        position = #session.step+1 
     elseif not position then
-        position = step.position == 'pre' and #session.pre_step+1 or #session.post_step+1
+        position = #session.step+1 
     end
     
-    step.id = name or newid
-    if step.position == 'post' then
-        table.insert(session.post_step,position,step)
-    else
-        table.insert(session.pre_step,position,step)        
-    end
+    step.id = newid or name
+    table.insert(session.step,position,step)
     return step
 end
 
-api.steprm = function(session,position,index)
-    if not index then
-        index = position
-        position = 'pre'
-    end
+api.steprm = function(session,index)
+    index = index or 1
     if type(index) == 'string' then
         for i, v in ipairs(session.step) do
             if v.id == index then
@@ -53,8 +51,8 @@ api.steprm = function(session,position,index)
             end
         end
     end
-    session[position .. '_step'][index] = nil
-    session[position .. '_step'] = session.api.array.clear(session[position .. '_step'])
+    session.step[index] = nil
+    session.step = session.api.array.clear(session.step)
 end
 
 api.arghandler = function(session,args)
@@ -72,7 +70,6 @@ api.arghandler = function(session,args)
             table.insert(laterscript,v)
         end
     end
-
     for i, v in ipairs(laterscript) do
         session:run(api.file.load.text(v))
     end
@@ -83,27 +80,15 @@ api.loadcmds = function(session,templib)
     if templib.preload ~= nil then
         templib.preload(session)
     end
-    for k, v in pairs(templib.cmd) do
-        session.data.cmd[k] = v
-        session.cmd[k] = session.data.cmd[k]
+    if templib.cmd then
+        for k, v in pairs(templib.cmd) do
+            session.data.cmd[k] = v
+            session.cmd[k] = session.data.cmd[k]
+        end
     end
-    for k, step in pairs(templib.step) do
-        if type(step) == 'function' then
-            local _step = 
-            {
-                id = templib.step[k .. '_id'] or k,
-                position = templib.step[k .. '_position'] or 'pre',
-                func = step
-            }
-            session.data.step[k] = _step
-        elseif type(step) == 'table' then
-            local _step = 
-            {
-                id = templib.step.id or k,
-                position = templib.step.position or 'pre',
-                func = step.func
-            }
-            session.data.step[k] = _step
+    if templib.step then
+        for k, step in pairs(templib.step) do
+            session.data.step[k] = step
         end
     end
     if templib.setup ~= nil then
@@ -112,18 +97,10 @@ api.loadcmds = function(session,templib)
 end
 
 api.new = {
-    step = function(func,position,id)
-        local step = {}
-        step.func = func
-        step.position = position or 'pre'
-        step.id = id or api.id()
-        return step
-    end,
     session = function()
         local session = 
         {
-            pre_step = {},
-            post_step = {},
+            step = {},
             temp = {},
             run = api.run,
             stepadd = api.stepadd,
@@ -183,7 +160,7 @@ api.run = function(session, command)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        for k, step in pairs(session.pre_step) do
+        for k, step in pairs(session.step) do
             cmd = api.stepin(session,step,cmd)
             if session.temp.wskip or session.temp.skip then
                 break
@@ -198,13 +175,8 @@ api.run = function(session, command)
             end
             result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd)
         end
-        for k, step in pairs(session.post_step) do
-            cmd = api.stepin(session,step,cmd)
-            if session.temp.wskip or session.temp.skip then
-                break
-            end
-        end
     end
+    session.data.result = result
     return result
 end
 

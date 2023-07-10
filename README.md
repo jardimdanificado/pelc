@@ -62,7 +62,7 @@
 ## plec - Step Library Commands(lib.step)
 
 - `step.add id position newid` : stepadd a loaded step, only _id_ is obligatory
-- `step.rm p` : remove step ate _p_ position
+- `step.rm index/id` : remove step at _index_ or by its _id_
 - `step.help` : list all stepadded steps
 - `step.lhelp` : list all loaded steps
 

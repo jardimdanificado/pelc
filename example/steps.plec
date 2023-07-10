@@ -2,6 +2,6 @@ require std step; -- you can require any libs you want with a single require com
 w = step;
 @w.help;
 @w.lhelp;
-@w.rm 1;
+@w.rm _=;
 @w.help;
 exit

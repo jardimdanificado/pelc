@@ -9,14 +9,9 @@ lib.cmd['step.add'] = function(session,args)
 end
 
 lib.cmd["step.help"] = function(session,args)
-    print("\27[32mPre_steps:\27[0m")
-    for k, v in pairs(session.pre_step) do
+    print("\27[32msteps:\27[0m")
+    for k, v in pairs(session.step) do
         print('[' .. k .. '] : ' .. v.id .. ',')
-    end
-    print()
-    print("\27[32mPost_steps:\27[0m")
-    for k, v in pairs(session.post_step) do
-        print(v.id)
     end
     print('--end')
 end

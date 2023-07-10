@@ -71,66 +71,52 @@ end
 -- STEPS
 --------------------- STEPS
 
-core.step['='] = 
-{
-    id = "=",
-    position = "pre",
-    func = function(session, cmd)
-        local split = session.api.string.split(cmd," ")
-        if split[2] == '=' then
-            cmd = cmd:gsub("=",' = ')
-            cmd = cmd:gsub("%s+=%s+",' ')
-            cmd = "set " .. cmd
-        end
-        return cmd
+core.step['='] = function(session, cmd)
+    local split = session.api.string.split(cmd," ")
+    if split[2] == '=' then
+        cmd = cmd:gsub("=",' = ')
+        cmd = cmd:gsub("%s+=%s+",' ')
+        cmd = "set " .. cmd
     end
-}
-core.step['=>'] = 
-{
-    id = "=>",
-    position = "pre",
-    func = function(session, cmd)
-        local split = session.api.string.split(cmd," ")
-        if split[2] == '=>' then
-            cmd = cmd:gsub("=>",'')
-            cmd = "autodef " .. cmd
-        end
-        return cmd
+    return cmd
+end
+core.step['=>'] = function(session, cmd)
+    local split = session.api.string.split(cmd," ")
+    if split[2] == '=>' then
+        cmd = cmd:gsub("=>",'')
+        cmd = "autodef " .. cmd
     end
-}
-core.step.unref =
-{
-    id = "unref",
-    position = 'pre',
-    func = function(session, cmd)
-        if session.api.string.includes(cmd, '@') then
-            cmd = cmd:gsub("@%s+", "@")
-            local newc = cmd
-            local links = {}
-            while session.api.string.includes(newc,"@") == true do
-                local link,result = session.api.getlink(newc,"@")
-                newc = result
-                table.insert(links,link)
-            end
-            for i, link in ipairs(links) do
-                if session.data[link:gsub('@','')] then
-                    cmd = cmd:gsub(link,session.api.stringify(session.data[link:gsub('@','')]))
-                else
-                    print(link .. ' has no value.')
-                    session.temp.skip = true
-                end
-                
-            end
-        end
-        return cmd
-    end,
-}
+    return cmd
+end
 
-local function processCommand(session, cmd)
+core.step.unref = function(session, cmd)
+    if session.api.string.includes(cmd, '@') then
+        cmd = cmd:gsub("@%s+", "@")
+        local newc = cmd
+        local links = {}
+        while session.api.string.includes(newc,"@") == true do
+            local link,result = session.api.getlink(newc,"@")
+            newc = result
+            table.insert(links,link)
+        end
+        for i, link in ipairs(links) do
+            if session.data[link:gsub('@','')] then
+                cmd = cmd:gsub(link,session.api.stringify(session.data[link:gsub('@','')]))
+            else
+                print(link .. ' has no value.')
+                session.temp.skip = true
+            end
+            
+        end
+    end
+    return cmd
+end
+
+core.step.unwrapcmd = function (session, cmd)
     local startPos, endPos = cmd:find('%(%b[]%)')
     while startPos do
         local content = cmd:sub(startPos + 2, endPos - 2) -- Extract the content within parentheses
-        local result = processCommand(session, content) or ''
+        local result = core.step.unwrapcmd(session, content) or ''
         local processedContent = session:run(result) or ''
         cmd = cmd:sub(1, startPos - 1) .. processedContent .. cmd:sub(endPos + 1)
         startPos, endPos = cmd:find('%(%b[]%)')
@@ -138,45 +124,24 @@ local function processCommand(session, cmd)
     return cmd
 end
 
-core.step.unwrapcmd = 
-{
-    id = "unwrapcmd",
-    position = 'pre',
-    func = processCommand,
-}
-core.step.spacendclean = 
-{
-    id = "spacendclean",
-    position = 'pre',
-    func = function(session,cmd)
-        return string.gsub(cmd, "^%s*(.-)%s*$", "%1")
-    end,
-}
+core.step.spacendclean = function(session,cmd)
+    return string.gsub(cmd, "^%s*(.-)%s*$", "%1")
+end
 
-core.step.segfault = 
-{
-    id = "segfault",
-    position = 'pre',
-    func = function(session,cmd)
-        session.temp.cmdname = session.temp.cmdname or session.api.string.split(cmd,'%s+')[1]
-        if not session.cmd[session.temp.cmdname] then
-            if session.data.step[session.temp.cmdname] then
-                print(session.temp.cmdname .. ' command exist but is not loaded!')
-            else
-                print(session.temp.cmdname .. ' command do not exist!')
-            end
-            session.temp.skip = true
+core.step.segfault = function(session,cmd)
+    session.temp.cmdname = session.temp.cmdname or session.api.string.split(cmd,'%s+')[1]
+    if not session.cmd[session.temp.cmdname] then
+        if session.data.step[session.temp.cmdname] then
+            print(session.temp.cmdname .. ' command exist but is not loaded!')
+        else
+            print(session.temp.cmdname .. ' command do not exist!')
         end
+        session.temp.skip = true
     end
-}
-core.step["@"] = 
-{
-    id = "@",
+end
 
-    position = 'pre',
-    func = function(session,cmd)
-        return cmd:gsub("%@","%@")
-    end
-}
+core.step["@"] = function(session,cmd)
+    return cmd:gsub("%@","%@")
+end
 
 return core

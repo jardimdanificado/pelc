@@ -1,13 +1,8 @@
 local time = {cmd = {},step = {}}
 
-time.step.timepass =
-{
-    id = "timepass",
-    position = 'pre',
-    func = function(session)
-        session.data.time = session.data.time + 1
-    end
-}
+time.step.timepass = function(session)
+    session.data.time = session.data.time + 1
+end
 
 time.preload = function(session)
     session.data.time = 0

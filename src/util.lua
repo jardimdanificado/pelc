@@ -769,7 +769,7 @@ util.stringify = function(obj, indent)
                 tableStr = tableStr .. recursiveToString(v, indent + 2)
                 tableStr = tableStr .. indentStr .. "},\n"
             elseif type(v) == "function" then
-                -- Handle functions as desired
+                -- Handle functions
                 tableStr = tableStr .. indentStr .. tostring(k) .. " = <function>,\n"
             elseif type(v) == "boolean" then
                 -- Handle booleans
