@@ -27,7 +27,7 @@ api.stepadd = function(session,name,position,newid)
     local step = 
     {
         id = '',
-        func = session.data.step[name]
+        func = session.data.step[name].func
     }
 
     if type(position) == "string" then
@@ -87,8 +87,8 @@ api.loadcmds = function(session,templib)
         end
     end
     if templib.step then
-        for k, step in pairs(templib.step) do
-            session.data.step[k] = step
+        for k, func in pairs(templib.step) do
+            session.data.step[k] = api.new.step(func,k)
         end
     end
     if templib.setup ~= nil then
@@ -97,6 +97,12 @@ api.loadcmds = function(session,templib)
 end
 
 api.new = {
+    step = function(func,id)
+        return {
+            func = func,
+            id = id
+        }
+    end,
     session = function()
         local session = 
         {
@@ -150,7 +156,7 @@ api.getline = function()
     return str
 end
 
-api.run = function(session, command)
+api.run = function(session, command, steplist)
     if not session.temp.keep then        
         session.temp = {}
     else
@@ -160,7 +166,7 @@ api.run = function(session, command)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        for k, step in pairs(session.step) do
+        for k, step in ipairs(steplist or session.step) do
             cmd = api.stepin(session,step,cmd)
             if session.temp.wskip or session.temp.skip then
                 break
