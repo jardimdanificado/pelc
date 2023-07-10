@@ -32,33 +32,33 @@ api.stepadd = function(session,name,position,newid)
 
     if type(position) == "string" then
         newid = position
-        position = #session.step+1 
+        position = #session.step.main+1 
     elseif not position then
-        position = #session.step+1 
+        position = #session.step.main+1 
     end
     
     step.id = newid or name
-    table.insert(session.step,position,step)
+    table.insert(session.step.main,position,step)
     return step
 end
 
 api.steprm = function(session,index)
     index = index or 1
     if type(index) == 'string' then
-        for i, v in ipairs(session.step) do
+        for i, v in ipairs(session.step.main) do
             if v.id == index then
                 index = i
             end
         end
     end
-    session.step[index] = nil
-    session.step = session.api.array.clear(session.step)
+    session.step.main[index] = nil
+    session.step.main = session.api.array.clear(session.step.main)
 end
 
 api.stepreplace = function(session,position,stepname,optnewid) 
     local reference
     if type(position) == 'string' then
-        for k, v in pairs(session.step) do
+        for k, v in pairs(session.step.main) do
             if v.id == position then
                 reference = v
             end
@@ -67,7 +67,7 @@ api.stepreplace = function(session,position,stepname,optnewid)
             return
         end
     end
-    reference = reference or session.step[position]
+    reference = reference or session.step.main[position]
     reference.func = session.data.step[stepname]
     reference.id = optnewid or reference.id
     return reference
@@ -124,7 +124,7 @@ api.new = {
     session = function()
         local session = 
         {
-            step = {},
+            step = {main={}},
             temp = {},
             run = api.run,
             stepadd = api.stepadd,
@@ -178,7 +178,7 @@ api.run = function(session, command, steplist)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        for k, step in ipairs(steplist or session.step) do
+        for k, step in ipairs(steplist or session.step.main) do
             if session.temp.wskip or session.temp.skip then
                 break
             end

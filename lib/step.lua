@@ -10,7 +10,7 @@ end
 
 lib.cmd["step.help"] = function(session,args)
     print("\27[32msteps:\27[0m")
-    for k, v in pairs(session.step) do
+    for k, v in pairs(session.step.main) do
         print('[' .. k .. '] : ' .. v.id .. ',')
     end
     print('--end')
