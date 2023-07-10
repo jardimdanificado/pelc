@@ -4,7 +4,9 @@ core.step = {}
 
 core.cmd.exit = function(session,args)
     session.temp.exit = true
+    session.temp.skip = true
 end
+
 core.cmd.run = function(session,args)
     session.api.run(session,session.api.file.load.text(args[1]))
 end
@@ -110,6 +112,14 @@ core.step.unref = function(session, cmd)
         end
     end
     return cmd
+end
+
+core.step.cleartemp = function(session,cmd)
+    if not session.temp.keep then        
+        session.temp = {}
+    else
+        session.temp.keep = false
+    end
 end
 
 core.step.unwrapcmd = function (session, cmd)

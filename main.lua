@@ -4,6 +4,7 @@ local session = api.new.session()
 
 api.run(session,"require core") --lib containing the basics to set a working console, its also included in std
 
+session:stepadd("cleartemp","_cleartemp")
 session:stepadd("=>","_=>")
 session:stepadd("=","_=")
 session:stepadd("@","_@")

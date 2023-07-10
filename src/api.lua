@@ -55,6 +55,24 @@ api.steprm = function(session,index)
     session.step = session.api.array.clear(session.step)
 end
 
+api.stepreplace = function(session,position,stepname,optnewid) 
+    local reference
+    if type(position) == 'string' then
+        for k, v in pairs(session.step) do
+            if v.id == position then
+                reference = v
+            end
+        end
+        if not reference then
+            return
+        end
+    end
+    reference = reference or session.step[position]
+    reference.func = session.data.step[stepname]
+    reference.id = optnewid or reference.id
+    return reference
+end
+
 api.arghandler = function(session,args)
     local laterscript = {}
     local skip = false
@@ -157,20 +175,14 @@ api.getline = function()
 end
 
 api.run = function(session, command, steplist)
-    if not session.temp.keep then        
-        session.temp = {}
-    else
-        session.temp.keep = false
-    end
-
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
         for k, step in ipairs(steplist or session.step) do
-            cmd = api.stepin(session,step,cmd)
             if session.temp.wskip or session.temp.skip then
                 break
             end
+            cmd = api.stepin(session,step,cmd)
         end
         session.temp.cmdname = api.string.split(cmd,"%s+")[1]
         if not session.temp.skip or not session.temp.cskip then
