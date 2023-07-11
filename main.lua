@@ -1,5 +1,5 @@
 #!/usr/bin/luajit
-print(jit.version or _VERSION .. ", plec 0.4.4")
+print((jit.version or _VERSION) .. ", plec 0.4.4")
 local api = require("src.api")
 local session = api.new.session()
 
