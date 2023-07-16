@@ -1,6 +1,6 @@
-local time = {cmd = {},step = {}}
+local time = {cmd = {},worker = {}}
 
-time.step.timepass = function(session)
+time.worker.timepass = function(session)
     session.data.time = session.data.time + 1
 end
 
@@ -9,7 +9,7 @@ time.preload = function(session)
 end
 
 time.setup = function(session)
-    session.stepadd("timepass","_timepass",1)
+    session:workeradd("timepass","_timepass",1)
 end
 
 time.cmd["time.get"] = function(session)

@@ -1,6 +1,6 @@
 local core = {}
 core.cmd = {}
-core.step = {}
+core.worker = {}
 
 core.cmd.exit = function(session,args)
     session.temp.exit = true
@@ -69,11 +69,11 @@ core.cmd[">"] = function(session,args, cmd)
     return result
 end
 
---------------------- STEPS
--- STEPS
---------------------- STEPS
+--------------------- workerS
+-- workerS
+--------------------- workerS
 
-core.step['='] = function(session, cmd)
+core.worker['='] = function(session, cmd)
     local split = session.api.string.split(cmd," ")
     if split[2] == '=' then
         cmd = cmd:gsub("=",' = ')
@@ -82,7 +82,7 @@ core.step['='] = function(session, cmd)
     end
     return cmd
 end
-core.step['=>'] = function(session, cmd)
+core.worker['=>'] = function(session, cmd)
     local split = session.api.string.split(cmd," ")
     if split[2] == '=>' then
         cmd = cmd:gsub("=>",'')
@@ -91,7 +91,7 @@ core.step['=>'] = function(session, cmd)
     return cmd
 end
 
-core.step.unref = function(session, cmd)
+core.worker.unref = function(session, cmd)
     if session.api.string.includes(cmd, '@') then
         cmd = cmd:gsub("@%s+", "@")
         local newc = cmd
@@ -114,7 +114,7 @@ core.step.unref = function(session, cmd)
     return cmd
 end
 
-core.step.cleartemp = function(session,cmd)
+core.worker.cleartemp = function(session,cmd)
     if not session.temp.keep then        
         session.temp = {}
     else
@@ -122,11 +122,11 @@ core.step.cleartemp = function(session,cmd)
     end
 end
 
-core.step.unwrapcmd = function (session, cmd)
+core.worker.unwrapcmd = function (session, cmd)
     local startPos, endPos = cmd:find('%(%b[]%)')
     while startPos do
         local content = cmd:sub(startPos + 2, endPos - 2) -- Extract the content within parentheses
-        local result = core.step.unwrapcmd(session, content) or ''
+        local result = core.worker.unwrapcmd(session, content) or ''
         local processedContent = session:run(result) or ''
         cmd = cmd:sub(1, startPos - 1) .. processedContent .. cmd:sub(endPos + 1)
         startPos, endPos = cmd:find('%(%b[]%)')
@@ -134,14 +134,14 @@ core.step.unwrapcmd = function (session, cmd)
     return cmd
 end
 
-core.step.spacendclean = function(session,cmd)
+core.worker.spacendclean = function(session,cmd)
     return string.gsub(cmd, "^%s*(.-)%s*$", "%1")
 end
 
-core.step.segfault = function(session,cmd)
+core.worker.segfault = function(session,cmd)
     session.temp.cmdname = session.temp.cmdname or session.api.string.split(cmd,'%s+')[1]
     if not session.cmd[session.temp.cmdname] then
-        if session.data.step[session.temp.cmdname] then
+        if session.data.worker[session.temp.cmdname] then
             print(session.temp.cmdname .. ' command exist but is not loaded!')
         else
             print(session.temp.cmdname .. ' command do not exist!')
@@ -150,7 +150,7 @@ core.step.segfault = function(session,cmd)
     end
 end
 
-core.step["@"] = function(session,cmd)
+core.worker["@"] = function(session,cmd)
     return cmd:gsub("%@","%@")
 end
 

@@ -17,48 +17,55 @@ api.getlink =  function(str,linksymbol)
     return (linksymbol .. match), result
 end
 
-api.stepin = function(session,step,cmd)
-    local tmp = step.func(session,cmd,step)
+api.work = function(session,worker,cmd)
+    local tmp = worker.func(session,cmd,worker)
     cmd = type(tmp) == "string" and tmp or cmd
     return cmd
 end
 
-api.stepadd = function(session,name,position,newid) 
-    local step = 
+api.workeradd = function(session,name,position,newid,customworkerlist) 
+    local wlist = session.workerlist[customworkerlist or 'main']
+
+    local worker = 
     {
         id = '',
-        func = session.data.step[name].func
+        func = session.data.worker[name].func
     }
 
     if type(position) == "string" then
         newid = position
-        position = #session.step.main+1 
+        position = #wlist+1 
     elseif not position then
-        position = #session.step.main+1 
+        position = #wlist+1 
     end
     
-    step.id = newid or name
-    table.insert(session.step.main,position,step)
-    return step
+    worker.id = newid or name
+    table.insert(wlist,position,worker)
+    return worker
 end
 
-api.steprm = function(session,index)
+api.workerrm = function(session,index,customworkerlist)
+    local wlist = session.workerlist[customworkerlist] or session.workerlist.main
     index = index or 1
     if type(index) == 'string' then
-        for i, v in ipairs(session.step.main) do
+        for i, v in ipairs(wlist) do
             if v.id == index then
                 index = i
             end
         end
     end
-    session.step.main[index] = nil
-    session.step.main = session.api.array.clear(session.step.main)
+    wlist[index] = nil
+    if customworkerlist then
+        session.workerlist[customworkerlist] = session.api.array.clear(wlist)
+    else
+        session.workerlist.main = session.api.array.clear(wlist)
+    end
 end
 
-api.stepreplace = function(session,position,stepname,optnewid) 
+api.workerreplace = function(session,position,workername,optnewid) 
     local reference
     if type(position) == 'string' then
-        for k, v in pairs(session.step.main) do
+        for k, v in pairs(session.workerlist.main) do
             if v.id == position then
                 reference = v
             end
@@ -67,8 +74,8 @@ api.stepreplace = function(session,position,stepname,optnewid)
             return
         end
     end
-    reference = reference or session.step.main[position]
-    reference.func = session.data.step[stepname]
+    reference = reference or session.workerlist.main[position]
+    reference.func = session.data.worker[workername]
     reference.id = optnewid or reference.id
     return reference
 end
@@ -94,7 +101,7 @@ api.arghandler = function(session,args)
 end
 
 api.loadcmds = function(session,templib)
-    templib.step = templib.step or {}
+    templib.worker = templib.worker or {}
     if templib.preload ~= nil then
         templib.preload(session)
     end
@@ -104,9 +111,9 @@ api.loadcmds = function(session,templib)
             session.cmd[k] = session.data.cmd[k]
         end
     end
-    if templib.step then
-        for k, func in pairs(templib.step) do
-            session.data.step[k] = api.new.step(func,k)
+    if templib.worker then
+        for k, func in pairs(templib.worker) do
+            session.data.worker[k] = api.new.worker(func,k)
         end
     end
     if templib.setup ~= nil then
@@ -115,7 +122,7 @@ api.loadcmds = function(session,templib)
 end
 
 api.new = {
-    step = function(func,id)
+    worker = function(func,id)
         return {
             func = func,
             id = id
@@ -124,11 +131,11 @@ api.new = {
     session = function()
         local session = 
         {
-            step = {main={}},
+            workerlist = {main={}},
             temp = {},
             run = api.run,
-            stepadd = api.stepadd,
-            steprm = api.steprm,
+            workeradd = api.workeradd,
+            workerrm = api.workerrm,
             time = 0,
             api = api,
             cmd = {},
@@ -160,7 +167,7 @@ api.new = {
                         end
                     end
                 },
-                step = {}
+                worker = {}
             }
         }
         session.cmd = api.array.clone(session.data.cmd)
@@ -174,19 +181,30 @@ api.getline = function()
     return str
 end
 
-api.run = function(session, command, steplist)
+api.run = function(session, command, workerlist)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        for k, step in ipairs(steplist or session.step.main) do
+        if not workerlist then
+            local splited = api.string.split(cmd,"%s+")
+            if api.string.includes(splited[1],"!") then
+                
+                local wlname = api.string.replace(splited[1],"!")
+                if session.workerlist[wlname] then
+                    workerlist = session.workerlist[wlname]
+                    cmd = api.string.replace(cmd,splited[1])
+                end
+            end
+        end
+        for k, worker in ipairs(workerlist or session.workerlist.main) do
             if session.temp.wskip or session.temp.skip then
                 break
             end
-            cmd = api.stepin(session,step,cmd)
+            cmd = api.work(session,worker,cmd)
         end
         session.temp.cmdname = api.string.split(cmd,"%s+")[1]
         if not session.temp.skip or not session.temp.cskip then
-            split = api.string.split(cmd, " ")
+            local split = api.string.split(cmd, " ")
             local args = {}
             for i = 2, #split, 1 do
                 table.insert(args,split[i])

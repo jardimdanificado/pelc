@@ -14,16 +14,16 @@
 
 - `lib.core` : core are the essential to get a working console session, it is automatically loaded into plec from main.lua, only need to worry about loading it if running a custom/modified plec
 - `lib.std` : standard is a extension of core, mostly composed by utils
-- `lib.time` : creates session.data.time and automaticly set a timepass step on top of others
-- `lib.step` : allow steps to be modified from inside a plec script or repl
+- `lib.time` : creates session.data.time and automaticly set a timepass worker on top of others
+- `lib.worker` : allow workers to be modified from inside a plec script or repl
 
 ## plec - Session Temp Values
 
 - `session.temp.exit` : responsible for exiting repl or keep in loop
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
-- `session.temp.wskip` : skip remaining steps
-- `session.temp.cskip` : prevent command from running but run all steps
-- `session.temp.skip` : skip both remaining steps and command
+- `session.temp.wskip` : skip remaining workers
+- `session.temp.cskip` : prevent command from running but run all workers
+- `session.temp.skip` : skip both remaining workers and command
 
 ## plec - Core Library Commands(lib.core)
 
@@ -37,7 +37,7 @@
 - `unload` : unload a loaded cmd from session.
 - `> lua-code` : solve a lua code
 
-## plec - Core Library Steps(lib.core)
+## plec - Core Library workers(lib.core)
 
 - `=` : turn _varname_ = _any1_ into set _varname_ _any1_
 - `=>` : turn _functioname_ => _any1_ into def _functioname_ _any1_
@@ -59,22 +59,23 @@
 - `exit` : quit, but complete the current loop
 - `terminate` : force quit, terminate the process
 
-## plec - Step Library Commands(lib.step)
+## plec - worker Library Commands(lib.worker)
 
-- `step.add id position newid` : stepadd a loaded step, only _id_ is obligatory
-- `step.rm index/id` : remove step at _index_ or by its _id_
-- `step.help` : list all stepadded steps
-- `step.lhelp` : list all loaded steps
+- `worker.add id position newid` : workeradd a loaded worker, only _id_ is obligatory
+- `worker.rm index/id` : remove worker at _index_ or by its _id_
+- `worker.help` : list all workeradded workers
+- `worker.lhelp` : list all loaded workers
 
-## plec - Step Library(lib.step)
+## plec - worker Library(lib.worker)
 
-- `step.add id position newid` : stepadd a loaded step, only _id_ is obligatory
-- `step.rm p` : remove step ate _p_ position
-- `step.help` : list all stepadded steps
-- `step.lhelp` : list all loaded steps
+- `worker.add id position newid` : workeradd a loaded worker, only _id_ is obligatory
+- `worker.rm p` : remove worker ate _p_ position
+- `worker.help` : list all workeradded workers
+- `worker.lhelp` : list all loaded workers
 
 ## plec - Syntax
 
 - `@variable` : is replaced by the _variable_ value
+- `!wl` : this set the current command to run on _wl_ workerlist
 - `([command])` : run _command_ on plec layer
 - `;` : separate commands, finish the command and start a new one
