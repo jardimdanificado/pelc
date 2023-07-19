@@ -185,17 +185,6 @@ api.run = function(session, command, workerlist)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        if not workerlist then
-            local splited = api.string.split(cmd,"%s+")
-            if api.string.includes(splited[1],"!") then
-                
-                local wlname = api.string.replace(splited[1],"!")
-                if session.workerlist[wlname] then
-                    workerlist = session.workerlist[wlname]
-                    cmd = api.string.replace(cmd,splited[1])
-                end
-            end
-        end
         for k, worker in ipairs(workerlist or session.workerlist.main) do
             if session.temp.wskip or session.temp.skip then
                 break

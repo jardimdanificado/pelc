@@ -1,3 +1,4 @@
 require time example;
-!custom echo @asdasda;
+name = test;
+!custom echo @name;
 exit;

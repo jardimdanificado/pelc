@@ -150,8 +150,20 @@ core.worker.segfault = function(session,cmd)
     end
 end
 
-core.worker["@"] = function(session,cmd)
-    return cmd:gsub("%@","%@")
+core.worker["!"] = function(session,cmd)
+    if session.api.string.includes(cmd,'!') then
+        local splited = session.api.string.split(cmd,"%s+")
+        if session.api.string.includes(splited[1],"!") then
+            local wlname = session.api.string.replace(splited[1],"!")
+            if session.workerlist[wlname] then
+                local result = session:run(session.api.string.replace(cmd,splited[1]),session.workerlist[wlname])
+                session.temp.skip = true
+                return result 
+            else
+                print("workerlist " .. wlname .. " does not exist.")
+            end
+        end
+    end
 end
 
 return core

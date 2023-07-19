@@ -1,6 +1,6 @@
 require std;
 help;
-set x 20;
+x = 20;
 set y 7;
 set z ([> @x/([> 5 + 5])]);
 echo @z;
