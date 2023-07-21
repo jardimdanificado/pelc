@@ -1,4 +1,4 @@
 require time example;
-name = test;
-!custom echo @name;
+text = this is a just setten test string variable.;
+custom!custom2 echo @text;
 exit;

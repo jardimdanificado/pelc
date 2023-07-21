@@ -8,8 +8,20 @@ example.setup = function(session)
             func=example.worker.spacendclean},
         {
             id = 'example',
-            func = function(session)
-                print("sucesso")
+            func = function(session,cmd)
+                print("sucesso3")
+            end
+        }
+    }
+    session.workerlist.custom2 = 
+    {
+        {
+            id = 'spaceandclean',
+            func=example.worker.spacendclean},
+        {
+            id = 'examples',
+            func = function(session,cmd)
+                print("sucesso2")
             end
         }
     }

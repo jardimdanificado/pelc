@@ -23,6 +23,17 @@ api.work = function(session,worker,cmd)
     return cmd
 end
 
+api.process = function(session, cmd, workerlist)
+    workerlist = workerlist or session.workerlist.main
+    for i = 1, #workerlist do
+        if session.temp.wskip or session.temp.skip then
+            break
+        end
+        cmd = api.work(session,workerlist[i],cmd)
+    end
+    return cmd
+end
+
 api.workeradd = function(session,name,position,newid,customworkerlist) 
     local wlist = session.workerlist[customworkerlist or 'main']
 
@@ -134,9 +145,9 @@ api.new = {
             workerlist = {main={}},
             temp = {},
             run = api.run,
+            process = api.process,
             workeradd = api.workeradd,
             workerrm = api.workerrm,
-            time = 0,
             api = api,
             cmd = {},
             data = 
@@ -185,12 +196,7 @@ api.run = function(session, command, workerlist)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        for k, worker in ipairs(workerlist or session.workerlist.main) do
-            if session.temp.wskip or session.temp.skip then
-                break
-            end
-            cmd = api.work(session,worker,cmd)
-        end
+        cmd = session:process(cmd,workerlist)-- workerlist can be nil ofc
         session.temp.cmdname = api.string.split(cmd,"%s+")[1]
         if not session.temp.skip or not session.temp.cskip then
             local split = api.string.split(cmd, " ")

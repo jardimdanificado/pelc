@@ -1,4 +1,4 @@
-print(((jit and jit.version) or _VERSION) .. ", plec 0.4.5")
+print(((jit and jit.version) or _VERSION) .. ", plec 0.4.7")
 local api = require("src.api")
 local session = api.new.session()
 

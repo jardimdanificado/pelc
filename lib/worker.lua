@@ -10,7 +10,7 @@ end
 
 lib.cmd["worker.help"] = function(session,args)
     print("\27[32mworkers:\27[0m")
-    for k, v in pairs(session.workerlist.main) do
+    for k, v in pairs(session.workerlist[args[1]] or session.workerlist.main) do
         print('[' .. k .. '] : ' .. v.id .. ',')
     end
     print('--end')

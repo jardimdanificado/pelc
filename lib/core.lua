@@ -13,7 +13,7 @@ end
 core.cmd['--'] = function() end
 core.cmd.set = function(session,args, cmd)
     local finalargs = {}
-    for i = 2, 1, -1 do
+    for i = #args, 1, -1 do
         table.insert(finalargs, args[i])
     end
     session.data[args[1]] = session.api.array.unpack(finalargs)
@@ -69,9 +69,9 @@ core.cmd[">"] = function(session,args, cmd)
     return result
 end
 
---------------------- workerS
--- workerS
---------------------- workerS
+--------------------- workers
+-- workers
+--------------------- workers
 
 core.worker['='] = function(session, cmd)
     local split = session.api.string.split(cmd," ")
@@ -154,14 +154,20 @@ core.worker["!"] = function(session,cmd)
     if session.api.string.includes(cmd,'!') then
         local splited = session.api.string.split(cmd,"%s+")
         if session.api.string.includes(splited[1],"!") then
-            local wlname = session.api.string.replace(splited[1],"!")
-            if session.workerlist[wlname] then
-                local result = session:run(session.api.string.replace(cmd,splited[1]),session.workerlist[wlname])
-                session.temp.skip = true
-                return result 
-            else
-                print("workerlist " .. wlname .. " does not exist.")
+            local cmdsplited = session.api.string.split(splited[1],"!")
+            local newcmd = cmd
+            for i, v in ipairs(cmdsplited) do
+                if v == '' then
+                    break
+                end
+                local wlname = session.api.string.replace(v,"!")
+                if session.workerlist[wlname] then
+                    newcmd = session:process(session.api.string.replace(newcmd,v),session.workerlist[wlname])
+                else
+                    print("workerlist " .. wlname .. " does not exist.")
+                end
             end
+            return session.api.string.replace(cmd,splited[1] .. "%s+")
         end
     end
 end
