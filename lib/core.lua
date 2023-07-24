@@ -11,26 +11,68 @@ core.cmd.run = function(session,args)
     session.api.run(session,session.api.file.load.text(args[1]))
 end
 core.cmd['--'] = function() end
-core.cmd.set = function(session,args, cmd)
+core.cmd.set = function(session, args, cmd)
+    local function setNestedValue(table, keys, value)
+        local currentTable = table
+        for i = 1, #keys - 1 do
+            local key = keys[i]
+            if not currentTable[key] or type(currentTable[key]) ~= "table" then
+                currentTable[key] = {}
+            end
+            currentTable = currentTable[key]
+        end
+        currentTable[keys[#keys]] = value
+    end
+
     local finalargs = {}
-    for i = #args, 1, -1 do
+    for i = 2, #args do -- Skip the first argument (args[1])
         table.insert(finalargs, args[i])
     end
-    session.data[args[1]] = session.api.array.unpack(finalargs)
-    local newcmd = cmd:gsub(args[1] .. ' ', '')
-    newcmd = newcmd:gsub("set ", '')
-    if args[2] == 'true' or args[2] == 'false' then
-        session.data[args[1]] = args[2] == true and true or false
-    elseif tonumber(newcmd) then
-        session.data[args[1]] = tonumber(newcmd)
+
+    local keys = {}
+    local nestedKey = args[1]
+    for key in nestedKey:gmatch("([^%.]+)") do
+        table.insert(keys, key)
+    end
+
+    if #keys > 1 then
+        setNestedValue(session.data, keys, tonumber(finalargs[1]))
     else
-        session.data[args[1]] = newcmd
+        local newcmd = cmd:gsub(args[1] .. ' ', '')
+        newcmd = newcmd:gsub("set ", '')
+        if args[2] == 'true' or args[2] == 'false' then
+            session.data[args[1]] = args[2] == 'true' and true or false
+        elseif tonumber(newcmd) then
+            session.data[args[1]] = tonumber(newcmd)
+        else
+            session.data[args[1]] = newcmd
+        end
     end
 end
-core.cmd.unset = function(session,args)
-    session.data[args[1]] = nil
-    session.api.array.clear(session.data)
+
+core.cmd.unset = function(session, args)
+    local function unsetNestedValue(table, keys)
+        local currentTable = table
+        for i = 1, #keys - 1 do
+            local key = keys[i]
+            if not currentTable[key] or type(currentTable[key]) ~= "table" then
+                -- If any intermediate key doesn't exist or is not a table, we stop here.
+                return
+            end
+            currentTable = currentTable[key]
+        end
+        currentTable[keys[#keys]] = nil
+    end
+
+    local keys = {}
+    local nestedKey = args[1]
+    for key in nestedKey:gmatch("([^%.]+)") do
+        table.insert(keys, key)
+    end
+
+    unsetNestedValue(session.data, keys)
 end
+
 core.cmd.def = function(session,args,cmd)
     session.data.cmd[args[1]] = (session.api.load("return function(session,args,cmd) " .. cmd:gsub('def '.. args[1] ,'',1) .. ' end'))()
 end

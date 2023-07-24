@@ -4,11 +4,11 @@ time.worker.timepass = function(session)
     session.data.time = session.data.time + 1
 end
 
-time.preload = function(session)
+time.preload = function(session) -- preload runs before setting commands and workers
     session.data.time = 0
 end
 
-time.setup = function(session)
+time.setup = function(session) -- setup runs after setting commands and workers
     session:workeradd("timepass","_timepass",1)
 end
 

@@ -13,6 +13,14 @@ std.cmd.pause = function(session,args)
     session:run()
 end
 
+std.cmd.exposes = function(_session,args)
+    session = _session
+end
+
+std.cmd.hides = function(_session,args)
+    session = nil
+end
+
 std.cmd.terminate = function(session,args)
     os.exit()
 end
