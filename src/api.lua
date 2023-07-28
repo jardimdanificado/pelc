@@ -22,6 +22,7 @@ api.process = function(session, cmd, workerlist)
     workerlist = workerlist or session.workerlist.main
     for i = 1, #workerlist do
         if session.temp["break"]then
+            session.temp['break'] = nil
             break
         end
         if not session.temp.skip then
@@ -29,6 +30,8 @@ api.process = function(session, cmd, workerlist)
             if result then
                 cmd = result
             end
+        else
+            session.temp.skip = nil
         end
     end
     return result
