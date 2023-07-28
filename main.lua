@@ -17,7 +17,7 @@ session:workeradd('unref',"_unref") -- unref a variable @variable
 session:workeradd("!","_!") -- multi-workerlist operator wl1!wl2!wl3!wl4
 session:workeradd("spacendclean","_removeStartAndEndSpaces") -- name says everything
 session:workeradd("cmdname","_cmdname") -- sets session.temp.cmdname
---session:workeradd("segfault","_segFault") -- throw errors
+session:workeradd("segfault","_segFault") -- throw errors
 session:workeradd("commander","_commander") -- split args then run the command
 
 session.run = api.run -- disable the legacy runner
