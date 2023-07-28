@@ -140,9 +140,12 @@ array.reduce = function(arr, callback, initial)
 end
 
 array.includes = function(arr, value)
+    if not arr then
+        return false
+    end
     for k, v in pairs(arr) do
         if (value == v) then
-            return true
+            return true,k
         end
     end
     return false

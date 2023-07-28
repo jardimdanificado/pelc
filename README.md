@@ -72,7 +72,9 @@
 
 ## plec - compiler Library(lib.compile)
 
-- `compile luajitpath Ccompiler` : compile command, it runs automaticaly if you do not disable setup
+- `compile luajitpath Ccompiler -V -Cgcc -I/include/folder/ -L/library/folder` : compile command, it runs automaticaly if you do not disable setup, -V activate vitrine
+- `cpreload` : manual preload in case you want more control over the compilation
+- `csetup` : manual setup in case you want more control over the compilation
 - `session.data.compile.vitrine` : demonstration mode, this copy the examples in the compilation
 - `session.data.compile.ccompiler` : allow you to set a C compiler
 - `session.data.compile.lib` : allow you to set a the lib path to your libraries

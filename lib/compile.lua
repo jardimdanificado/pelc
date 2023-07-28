@@ -1,11 +1,25 @@
 local compile = {cmd = {}}
 
+compile.preload = function(session,args)
+    local libcheck,lposition = session.api.array.includes(args,'-L')
+    local includecheck,iposition = session.api.array.includes(args,'-I')
+    local ccheck,cposition = session.api.array.includes(args,'-C')
+    local jcheck,jposition = session.api.array.includes(args,'-J')
+    session.data.compile = 
+    {
+        ccompiler = ccheck and session.api.string.replace(args[cposition],"-C",'') or 'gcc',
+        vitrine = session.api.array.includes(args,'-V') and true or false,
+        lib = libcheck and args[lposition] or '',
+        include = includecheck and args[iposition] or "-I/usr/include/luajit-2.1",
+        luajitpath = jcheck and session.api.string.replace(args[cposition],"-J",'') or "luajit"
+    }
+end
+
+compile.cmd.cpreload = compile.preload
+
 compile.cmd.compile = function(session, args)
-    local luajitpath = args and args[1] or 'luajit'
-    local ccompiler = args and args[2] or 'gcc'
-    if session.data.compile.ccompiler then
-        ccompiler = session.data.compile.ccompiler
-    end
+    local luajitpath = session.data.compile.luajitpath
+    local ccompiler = session.data.compile.ccompiler
     os.execute('rm -r build')
     
     local places = {'build' ,'build/src', 'build/src/util', 'build/lib'}
@@ -33,5 +47,7 @@ end
 compile.setup = function(session,args)
     compile.cmd.compile(session,args)
 end
+
+compile.cmd.csetup = compile.setup
 
 return compile
