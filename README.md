@@ -21,9 +21,8 @@
 
 - `session.temp.exit` : responsible for exiting repl or keep in loop
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
-- `session.temp.wskip` : skip remaining workers
-- `session.temp.cskip` : prevent command from running but run all workers
-- `session.temp.skip` : skip both remaining workers and command
+- `session.temp.break`: cancel current list processing
+- `session.temp.skip` : prevent next command from running
 
 ## plec - Core Library Commands(lib.core)
 

@@ -19,7 +19,7 @@ end
 lib.cmd["worker.lhelp"] = function(session,args)
     print("\27[32mLoaded workers:\27[0m")
     for k, v in pairs(session.data.worker) do
-        print('[' .. k .. '] : ' .. session.api.stringify(v):gsub('\n','') .. ',')
+        print('['..k..']')
     end
     print('--end')
 end
