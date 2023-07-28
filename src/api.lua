@@ -104,8 +104,6 @@ api.arghandler = function(session,args)
             api.legacyrun(session,"require lib." .. api.string.replace(v,'-l',''))
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
-        elseif api.string.includes(v,'-v') or api.string.includes(v,'-vitrine') then
-            session.data.vitrine = true
         end
     end
     for i, v in ipairs(laterscript) do

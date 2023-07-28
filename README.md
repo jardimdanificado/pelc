@@ -23,13 +23,11 @@
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
 - `session.temp.break`: cancel current list processing
 - `session.temp.skip` : prevent next command from running
-- `session.temp.vitrine` : demonstration mode, this copy the examples in the compilation
-- `session.temp.ccompiler` : alow you to set a C compiler
 
 ## plec - Session Data Values
 
-- `session.temp.preload` : prevent the preload from automaticaly run
-- `session.temp.setup` : prevent the setup from automaticaly run
+- `session.data.preload` : prevent the preload from automaticaly run
+- `session.data.setup` : prevent the setup from automaticaly run
 
 ## plec - Core Library Commands(lib.core)
 
@@ -74,7 +72,13 @@
 
 ## plec - compiler Library(lib.compile)
 
-- `compile luajitpath Ccompiler` : compile command, it runs automaticaly if you do not disable setup
+- `compile luajitpath Ccompiler -V -Cgcc -I/include/folder/ -L/library/folder` : compile command, it runs automaticaly if you do not disable setup, -V activate vitrine
+- `cpreload` : manual preload in case you want more control over the compilation
+- `csetup` : manual setup in case you want more control over the compilation
+- `session.data.compile.vitrine` : demonstration mode, this copy the examples in the compilation
+- `session.data.compile.ccompiler` : allow you to set a C compiler
+- `session.data.compile.lib` : allow you to set a the lib path to your libraries
+- `session.data.compile.include` : allow you to set a the include path to your headers
 
 ## plec - Syntax
 
@@ -83,7 +87,6 @@
 - `([command])` : run _command_ on plec layer
 - `;` : separate commands, finish the command and start a new one
 
-
 ## NOTES
 
-- remember that plec will ALWAYS start from its folder, no matter what you do, no matter where you are it will always start in the executable folder
+- remember that plec will ALWAYS start from its folder, no matter what you do, no matter where you are it will always start in the plec executable folder
