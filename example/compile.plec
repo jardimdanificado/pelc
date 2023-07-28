@@ -1,0 +1,4 @@
+set setup false;
+require compile;
+compile luajit clang;
+exit;

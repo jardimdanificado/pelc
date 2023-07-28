@@ -94,7 +94,7 @@ end
 api.arghandler = function(session,args)
     local laterscript = {}
     local skip = false
-    for i, v in ipairs(args) do
+    for i, v in ipairs(args or {}) do
         if skip ~= false then
             api.legacyrun(session, skip .. v)
             skip = false
@@ -104,6 +104,8 @@ api.arghandler = function(session,args)
             api.legacyrun(session,"require lib." .. api.string.replace(v,'-l',''))
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
+        elseif api.string.includes(v,'-v') or api.string.includes(v,'-vitrine') then
+            session.data.vitrine = true
         end
     end
     for i, v in ipairs(laterscript) do
@@ -113,7 +115,7 @@ end
 
 api.loadcmds = function(session,templib)
     templib.worker = templib.worker or {}
-    if templib.preload ~= nil then
+    if session.data.preload and templib.preload ~= nil then
         templib.preload(session)
     end
     if templib.cmd then
@@ -127,7 +129,7 @@ api.loadcmds = function(session,templib)
             session.data.worker[k] = api.new.worker(func,k)
         end
     end
-    if templib.setup ~= nil then
+    if session.data.setup and templib.setup ~= nil then
         templib.setup(session)
     end
 end
@@ -152,6 +154,8 @@ api.new = {
             cmd = {},
             data = 
             {
+                preload = true,
+                setup = true,
                 cmd = 
                 {
                     require = function(session,args)
@@ -195,16 +199,13 @@ api.legacyrun = function(session, command)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        --session.temp.cmdname = api.string.split(cmd,"%s+")[1]
         local split = api.string.split(cmd, " ")
         local args = {}
         for i = 2, #split, 1 do
             table.insert(args,split[i])
         end
-        --print(session.cmd[split[1]],split[1])
         result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd) or cmd
     end
-    session.data.result = result
     return result
 end
 

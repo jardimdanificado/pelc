@@ -1,5 +1,10 @@
 local _string = {}
 
+_string.endsWith = function(str, ending)
+    return ending == "" or str:sub(-#ending) == ending
+end
+
+
 _string.split = function(str, separator)
     local parts = {}
     local start = 1

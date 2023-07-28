@@ -2,6 +2,50 @@ local file = {}
 file.save = {}
 file.load = {}
 
+file.list = function(folderPath)
+    folderPath = folderPath or './'
+    local is_windows = package.config:sub(1,1) == '\\'  -- Check if the system is Windows
+
+    local files = {}
+    local folders = {}
+
+    local popen_cmd = is_windows and 'dir "'..folderPath..'" /b /a-d' or 'ls -p "'..folderPath..'" | grep -v /$'
+
+    local currentDir = io.popen(popen_cmd):read("*all")
+
+    for file in currentDir:gmatch("[^\r\n]+") do
+        table.insert(files, folderPath .. "/" .. file)
+    end
+
+    if not is_windows then
+        local popen_cmd_folders = 'ls -p "'..folderPath..'" | grep /$'
+        local subfolders_output = io.popen(popen_cmd_folders):read("*all")
+
+        for folder in subfolders_output:gmatch("[^\r\n]+") do
+            table.insert(folders, folder:sub(1, -2))  -- Remove trailing '/'
+        end
+    end
+
+    for _, subfolder in ipairs(folders) do
+        local subFolderPath = folderPath .. "/" .. subfolder
+        local subfolderFiles = file.list(subFolderPath)
+
+        for _, file in ipairs(subfolderFiles) do
+            table.insert(files, file)
+        end
+    end
+
+    return files
+end
+
+file.isdir = function(path)
+    local handle = io.popen("cd " .. path .. " 2>&1")
+    local result = handle:read("*all")
+    handle:close()
+    return result:find("Not a directory") == nil
+end
+
+
 file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file:read("*all")

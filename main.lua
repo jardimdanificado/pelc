@@ -1,11 +1,12 @@
-print(((jit and jit.version) or _VERSION) .. ", plec 0.5")
+package.path = "./?.raw;" .. package.path
+
 local api = require("src.api")
+
+print(api.luaversion() .. ", plec 0.5.1")
 
 local session = api.new.session() -- everything happen inside this
 
 api.legacyrun(session,"require core") --lib containing the basics to set a working console, its also included in std
-
-
 
 -- workers, these are used to modify commands and do turned actions
 session:workeradd("cleartemp","_cleartemp") -- clears session.temp
