@@ -21,9 +21,15 @@
 
 - `session.temp.exit` : responsible for exiting repl or keep in loop
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
-- `session.temp.wskip` : skip remaining workers
-- `session.temp.cskip` : prevent command from running but run all workers
-- `session.temp.skip` : skip both remaining workers and command
+- `session.temp.break`: cancel current list processing
+- `session.temp.skip` : prevent next command from running
+- `session.temp.vitrine` : demonstration mode, this copy the examples in the compilation
+- `session.temp.ccompiler` : alow you to set a C compiler
+
+## plec - Session Data Values
+
+- `session.temp.preload` : prevent the preload from automaticaly run
+- `session.temp.setup` : prevent the setup from automaticaly run
 
 ## plec - Core Library Commands(lib.core)
 
@@ -66,12 +72,9 @@
 - `worker.help` : list all workeradded workers
 - `worker.lhelp` : list all loaded workers
 
-## plec - worker Library(lib.worker)
+## plec - compiler Library(lib.compile)
 
-- `worker.add id position newid` : workeradd a loaded worker, only _id_ is obligatory
-- `worker.rm p` : remove worker ate _p_ position
-- `worker.help` : list all workeradded workers
-- `worker.lhelp` : list all loaded workers
+- `compile luajitpath Ccompiler` : compile command, it runs automaticaly if you do not disable setup
 
 ## plec - Syntax
 
@@ -79,3 +82,8 @@
 - `wl!wl2!wl3` : this set the current command to run on _wl_ _wl2_ _wl3_ workerlists
 - `([command])` : run _command_ on plec layer
 - `;` : separate commands, finish the command and start a new one
+
+
+## NOTES
+
+- remember that plec will ALWAYS start from its folder, no matter what you do, no matter where you are it will always start in the executable folder

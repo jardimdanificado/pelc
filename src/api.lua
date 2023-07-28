@@ -17,21 +17,21 @@ api.getlink =  function(str,linksymbol)
     return (linksymbol .. match), result
 end
 
-api.work = function(session,worker,cmd)
-    local tmp = worker.func(session,cmd,worker)
-    cmd = type(tmp) == "string" and tmp or cmd
-    return cmd
-end
-
 api.process = function(session, cmd, workerlist)
+    local result
     workerlist = workerlist or session.workerlist.main
     for i = 1, #workerlist do
-        if session.temp.wskip or session.temp.skip then
+        if session.temp["break"]then
             break
         end
-        cmd = api.work(session,workerlist[i],cmd)
+        if not session.temp.skip then
+            result = workerlist[i].func(session,result or cmd) 
+            if result then
+                cmd = result
+            end
+        end
     end
-    return cmd
+    return result
 end
 
 api.workeradd = function(session,name,position,newid,customworkerlist) 
@@ -94,26 +94,28 @@ end
 api.arghandler = function(session,args)
     local laterscript = {}
     local skip = false
-    for i, v in ipairs(args) do
+    for i, v in ipairs(args or {}) do
         if skip ~= false then
-            session:run(skip .. v)
+            api.legacyrun(session, skip .. v)
             skip = false
         elseif v == '-l' then
             skip = "import "
         elseif api.string.includes(v,'-l') then
-            session:run("require lib." .. api.string.replace(v,'-l',''))
+            api.legacyrun(session,"require lib." .. api.string.replace(v,'-l',''))
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
+        elseif api.string.includes(v,'-v') or api.string.includes(v,'-vitrine') then
+            session.data.vitrine = true
         end
     end
     for i, v in ipairs(laterscript) do
-        session:run(api.file.load.text(v))
+        api.run(session,api.file.load.text(v))
     end
 end
 
 api.loadcmds = function(session,templib)
     templib.worker = templib.worker or {}
-    if templib.preload ~= nil then
+    if session.data.preload and templib.preload ~= nil then
         templib.preload(session)
     end
     if templib.cmd then
@@ -127,7 +129,7 @@ api.loadcmds = function(session,templib)
             session.data.worker[k] = api.new.worker(func,k)
         end
     end
-    if templib.setup ~= nil then
+    if session.data.setup and templib.setup ~= nil then
         templib.setup(session)
     end
 end
@@ -152,6 +154,8 @@ api.new = {
             cmd = {},
             data = 
             {
+                preload = true,
+                setup = true,
                 cmd = 
                 {
                     require = function(session,args)
@@ -167,7 +171,6 @@ api.new = {
                             end
                             session.api.loadcmds(session,templib)
                         end
-                        
                     end,
                     import = function(session,args)
                         for k, v in pairs(args) do
@@ -192,22 +195,28 @@ api.getline = function()
     return str
 end
 
+api.legacyrun = function(session, command)
+    command = command or api.getline()
+    local result = ''
+    for i, cmd in ipairs(api.formatcmd(command)) do
+        local split = api.string.split(cmd, " ")
+        local args = {}
+        for i = 2, #split, 1 do
+            table.insert(args,split[i])
+        end
+        result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd) or cmd
+    end
+    return result
+end
+
 api.run = function(session, command, workerlist)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
-        cmd = session:process(cmd,workerlist)-- workerlist can be nil ofc
-        session.temp.cmdname = api.string.split(cmd,"%s+")[1]
-        if not session.temp.skip or not session.temp.cskip then
-            local split = api.string.split(cmd, " ")
-            local args = {}
-            for i = 2, #split, 1 do
-                table.insert(args,split[i])
-            end
-            result = (session.cmd[split[1]] or session.cmd['--'])(session,args,cmd)
-        end
+        
+        result = session:process(cmd,workerlist) or '' -- workerlist can be nil ofc
+        --print('cmd:' .. api.string.split(cmd,' ')[1] .. '\nreturn:' .. result)
     end
-    session.data.result = result
     return result
 end
 

@@ -45,6 +45,14 @@ util.file = require "src.util.file"
 util.encode = require "src.util.encode"
 util.console = require "src.util.console"
 
+util.isjit = function(iftrue,ifalse)
+    return (jit and jit.version) and (iftrue or true) or (ifalse or false)
+end
+
+util.luaversion = function()
+    return (jit and jit.version) or _VERSION
+end
+
 util.time = function(func, ...)
     local name = 'noname'
     if type(func) == 'table' then

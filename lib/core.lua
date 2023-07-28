@@ -4,7 +4,7 @@ core.worker = {}
 
 core.cmd.exit = function(session,args)
     session.temp.exit = true
-    session.temp.skip = true
+    session.temp['break'] = true
 end
 
 core.cmd.run = function(session,args)
@@ -148,7 +148,7 @@ core.worker.unref = function(session, cmd)
                 cmd = cmd:gsub(link,session.api.stringify(session.data[link:gsub('@','')]))
             else
                 print(link .. ' has no value.')
-                session.temp.skip = true
+                session.temp['break'] = true
             end
             
         end
@@ -188,12 +188,13 @@ core.worker.segfault = function(session,cmd)
         else
             print(session.temp.cmdname .. ' command do not exist!')
         end
-        session.temp.skip = true
+        session.temp['break'] = true
     end
 end
 
 core.worker["!"] = function(session,cmd)
-    if session.api.string.includes(cmd,'!') then
+    if type(cmd) == 'string' and session.api.string.includes(cmd,'!') then
+        print(cmd)
         local splited = session.api.string.split(cmd,"%s+")
         if session.api.string.includes(splited[1],"!") then
             local cmdsplited = session.api.string.split(splited[1],"!")
@@ -204,7 +205,7 @@ core.worker["!"] = function(session,cmd)
                 end
                 local wlname = session.api.string.replace(v,"!")
                 if session.workerlist[wlname] then
-                    newcmd = session:process(session.api.string.replace(newcmd,v),session.workerlist[wlname])
+                    newcmd = session:run(session.api.string.replace(newcmd,v),session.workerlist[wlname])
                 else
                     print("workerlist " .. wlname .. " does not exist.")
                 end
@@ -213,5 +214,23 @@ core.worker["!"] = function(session,cmd)
         end
     end
 end
+
+core.worker.cmdname = function(session,cmd)
+    session.temp.cmdname = session.api.string.split(cmd,"%s+")[1]
+    return cmd
+end
+
+core.worker.commander = function(session,cmd)
+    local result
+    local split = session.api.string.split(cmd, " ")
+    local args = {}
+    for i = 2, #split, 1 do
+        table.insert(args,split[i])
+    end
+    result = session.cmd[split[1]](session,args,cmd) or ''
+    return result
+end
+
+
 
 return core
