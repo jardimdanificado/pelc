@@ -105,7 +105,7 @@ api.arghandler = function(session,args)
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
         elseif api.string.includes(v,'-v') or api.string.includes(v,'-vitrine') then
-            session.data.vitrine = true
+            session.data.compile.vitrine = true
         end
     end
     for i, v in ipairs(laterscript) do
@@ -156,6 +156,13 @@ api.new = {
             {
                 preload = true,
                 setup = true,
+                compile = 
+                {
+                    ccompiler = 'gcc',
+                    vitrine = false,
+                    lib = '',
+                    include = "-I/usr/include/luajit-2.1"
+                },
                 cmd = 
                 {
                     require = function(session,args)
