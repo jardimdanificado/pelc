@@ -23,8 +23,8 @@
 - `session.temp.keep` : prevent the session.temp begin cleared, auto-disable
 - `session.temp.break`: cancel current list processing
 - `session.temp.skip` : prevent next command from running
-- `session.temp.vitrine` : demonstration mode, this copy the examples in the compilation
-- `session.temp.ccompiler` : alow you to set a C compiler
+- `session.temp.compile.vitrine` : demonstration mode, this copy the examples in the compilation
+- `session.temp.compile.ccompiler` : alow you to set a C compiler
 
 ## plec - Session Data Values
 
@@ -83,7 +83,6 @@
 - `([command])` : run _command_ on plec layer
 - `;` : separate commands, finish the command and start a new one
 
-
 ## NOTES
 
-- remember that plec will ALWAYS start from its folder, no matter what you do, no matter where you are it will always start in the executable folder
+- remember that plec will ALWAYS start from its folder, no matter what you do, no matter where you are it will always start in the plec executable folder

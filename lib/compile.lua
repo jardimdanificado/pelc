@@ -14,7 +14,7 @@ compile.cmd.compile = function(session, args)
     end
     os.execute(luajitpath .. ' -b main.lua build/main.h') 
     os.execute("cp src/wrapper.c build/main.c")
-    os.execute(ccompiler .. " -o " .. (session.api.string.includes(ccompiler,'mingw') and "build/plec.exe" or "build/plec") .. " build/main.c -I/usr/include/luajit-2.1 -lluajit-5.1")
+    os.execute(ccompiler .. " -o " .. (session.api.string.includes(ccompiler,'mingw') and "build/plec.exe" or "build/plec") .. " build/main.c "..(session.compile.include or "-I/usr/include/luajit-2.1") ..(session.compile.lib or "").. " -lluajit-5.1")
     local files = session.api.file.list()
     for k, file in pairs(files) do
         if not session.api.string.includes(file, 'compile.lua') and not session.api.string.includes(file, 'main.lua') and session.api.string.includes(file, '.lua') then
