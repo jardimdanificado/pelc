@@ -13,10 +13,15 @@ raylib.setup = function(session)
             end
         end
     else
-        print("raylib is not avaliable.")        
+        print("raylib is not avaliable.")
     end
 end
 
-
+raylib.cmd = 
+{
+    ['rl.init'] = function(session,args)
+        
+    end,
+}
 
 return raylib

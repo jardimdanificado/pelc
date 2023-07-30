@@ -20,6 +20,9 @@ session:workeradd("cmdname","_cmdname") -- sets session.temp.cmdname
 session:workeradd("segfault","_segFault") -- throw errors
 session:workeradd("commander","_commander") -- split args then run the command
 
+session.workerlist.sysprocessor = session.workerlist.main
+session.workerlist.main = {}
+
 session.run = api.run -- disable the legacy runner
 
 api.arghandler(session,arg) --name says everything, this handle the console arguments
@@ -35,7 +38,7 @@ api.file.save.text('changed.txt', api.encode.base64Decode(api.encode.load("abc.t
 
 -- console loop
 while not session.temp.exit do
-    session:run()
+    session:run(nil,session.workerlist.sysprocessor)
 end
 
 session.temp.exit = nil

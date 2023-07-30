@@ -215,7 +215,7 @@ api.run = function(session, command, workerlist)
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
         
-        result = session:process(cmd,workerlist) or '' -- workerlist can be nil ofc
+        result = session:process(cmd,workerlist or session.workerlist.sysprocessor) or '' -- workerlist can be nil ofc
         --print('cmd:' .. api.string.split(cmd,' ')[1] .. '\nreturn:' .. result)
     end
     return result
