@@ -18,6 +18,9 @@ end
 compile.cmd.cpreload = compile.preload
 
 compile.cmd.compile = function(session, args)
+    if args and args[1] then
+        compile.cmd.cpreload(session,args)
+    end
     local luajitpath = session.data.compile.luajitpath
     local ccompiler = session.data.compile.ccompiler
     os.execute('rm -r build')
@@ -38,14 +41,14 @@ compile.cmd.compile = function(session, args)
     end
     os.execute('rm build/main.c build/main.h')
     if session.data.compile.vitrine then
-        os.execute("cp example build/example")
+        os.execute("cp -r example build/example")
     end
     session.data.compile = nil
-    os.exit()
 end
 
 compile.setup = function(session,args)
     compile.cmd.compile(session,args)
+    os.exit()
 end
 
 compile.cmd.csetup = compile.setup
