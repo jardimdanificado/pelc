@@ -149,33 +149,27 @@ end
 
 core.worker.unref = function(session, cmd)
     if session.api.string.includes(cmd, '@') then
-        -- cmd = cmd:gsub("@%s+", "@")
+        cmd = cmd:gsub("@%s+", "@")
         local newc = cmd
         local links = {}
-        while session.api.string.includes(newc, "@") do
-            local link, result = session.api.getlink(newc, "@")
+        while session.api.string.includes(newc,"@") == true do
+            local link,result = session.api.getlink(newc,"@")
             newc = result
             table.insert(links,link)
         end
-        if #links == 1 then
-            cmd = session.api.string.replace(cmd,links[1],session.api.stringify(session.data[links[1]:gsub('@','')]))
-            --print(cmd)
-        else
-            local curr = session.data
-            
-            for i, link in ipairs(links) do
-                local splited = session.api.string.split(link:gsub('@',''),"([^%.]+)")
-                print(session.api.stringify(splited))
-                for i, key in ipairs(splited) do
-                    curr = curr[tonumber(key) or key]
-                end
+        for i, link in ipairs(links) do
+            if session.data[link:gsub('@','')] then
+                cmd = cmd:gsub(link,session.api.stringify(session.data[link:gsub('@','')]))
+            else
+                print(link .. ' has no value.')
+                session.temp['break'] = true
             end
-            cmd = session.api.string.replace(cmd,args,session.api.stringify(session,{curr}))
+            
         end
-        
     end
     return cmd
 end
+
 
 core.worker.cleartemp = function(session,cmd)
     if not session.temp.keep then        
