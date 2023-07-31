@@ -4,7 +4,7 @@ lib.cmd['worker.add'] = function(session,args)
     if not session.data.worker[args[1]] then
         print(args[1] .. ' command do not exist.')
     else
-        session:workeradd(args[1], args[2], args[3])
+        session:workeradd(args[1], args[2], args[3],args[4])
     end
 end
 

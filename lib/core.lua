@@ -15,7 +15,7 @@ core.cmd.set = function(session, args, cmd)
     local function setNestedValue(table, keys, value)
         local currentTable = table
         for i = 1, #keys - 1 do
-            local key = keys[i]
+            local key = tonumber(keys[i]) or keys[i]
             if not currentTable[key] or type(currentTable[key]) ~= "table" then
                 currentTable[key] = {}
             end
@@ -48,6 +48,20 @@ core.cmd.set = function(session, args, cmd)
             session.data[args[1]] = newcmd
         end
     end
+end
+
+core.cmd.get = function(session, args, cmd)
+    local keys = {}
+    local curr = session.data
+    if session.api.string.includes(args[1],'.') then
+        for key in args[1]:gmatch("([^%.]+)") do
+            table.insert(keys, key)
+        end
+    end
+    for i, v in ipairs(keys) do
+        curr = curr[tonumber(v) or v]
+    end
+    return curr
 end
 
 core.cmd.unset = function(session, args)
@@ -135,23 +149,30 @@ end
 
 core.worker.unref = function(session, cmd)
     if session.api.string.includes(cmd, '@') then
-        cmd = cmd:gsub("@%s+", "@")
+        -- cmd = cmd:gsub("@%s+", "@")
         local newc = cmd
         local links = {}
-        while session.api.string.includes(newc,"@") == true do
-            local link,result = session.api.getlink(newc,"@")
+        while session.api.string.includes(newc, "@") do
+            local link, result = session.api.getlink(newc, "@")
             newc = result
             table.insert(links,link)
         end
-        for i, link in ipairs(links) do
-            if session.data[link:gsub('@','')] then
-                cmd = cmd:gsub(link,session.api.stringify(session.data[link:gsub('@','')]))
-            else
-                print(link .. ' has no value.')
-                session.temp['break'] = true
-            end
+        if #links == 1 then
+            cmd = session.api.string.replace(cmd,links[1],session.api.stringify(session.data[links[1]:gsub('@','')]))
+            --print(cmd)
+        else
+            local curr = session.data
             
+            for i, link in ipairs(links) do
+                local splited = session.api.string.split(link:gsub('@',''),"([^%.]+)")
+                print(session.api.stringify(splited))
+                for i, key in ipairs(splited) do
+                    curr = curr[tonumber(key) or key]
+                end
+            end
+            cmd = session.api.string.replace(cmd,args,session.api.stringify(session,{curr}))
         end
+        
     end
     return cmd
 end
