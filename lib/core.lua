@@ -204,10 +204,10 @@ core.worker["!"] = function(session,cmd)
                     break
                 end
                 local wlname = session.api.string.replace(v,"!")
-                if session.workerlist[wlname] then
-                    newcmd = session:run(session.api.string.replace(newcmd,v),session.workerlist[wlname])
+                if session.pipeline[wlname] then
+                    newcmd = session:run(session.api.string.replace(newcmd,v),session.pipeline[wlname])
                 else
-                    print("workerlist " .. wlname .. " does not exist.")
+                    print("pipeline " .. wlname .. " does not exist.")
                 end
             end
             return session.api.string.replace(cmd,splited[1] .. "%s+")

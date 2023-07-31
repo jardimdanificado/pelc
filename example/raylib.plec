@@ -1,0 +1,8 @@
+require raylib;
+rl.setflag FLAG_VSYNC_HINT;
+rl.init 800 400;
+scene.bgcolor white;
+-- scene.newtxt 10 10 15 asdaakdka mdasmdkas dkamdkmaskm dasdmm;
+consolemode;
+rl.close;
+exit;

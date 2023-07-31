@@ -17,16 +17,16 @@ api.getlink =  function(str,linksymbol)
     return (linksymbol .. match), result
 end
 
-api.process = function(session, cmd, workerlist)
+api.process = function(session, cmd, pipeline)
     local result
-    workerlist = workerlist or session.workerlist.main
-    for i = 1, #workerlist do
+    pipeline = pipeline or session.pipeline.main
+    for i = 1, #pipeline do
         if session.temp["break"]then
             session.temp['break'] = nil
             break
         end
         if not session.temp.skip then
-            result = workerlist[i].func(session,result or cmd) 
+            result = pipeline[i].func(session,result or cmd) 
             if result then
                 cmd = result
             end
@@ -37,14 +37,19 @@ api.process = function(session, cmd, workerlist)
     return result
 end
 
-api.workeradd = function(session,name,position,newid,customworkerlist) 
-    local wlist = session.workerlist[customworkerlist or 'main']
+api.workeradd = function(session,name,position,newid,custompipeline) 
+    local wlist = session.pipeline[custompipeline or 'main']
 
     local worker = 
     {
         id = '',
-        func = session.data.worker[name].func
+        func = session.data.worker[name or ''].func or ''
     }
+
+    if type(name) == 'function' then
+        worker.func = name
+        name = session.api.id()
+    end
 
     if type(position) == "string" then
         newid = position
@@ -58,8 +63,8 @@ api.workeradd = function(session,name,position,newid,customworkerlist)
     return worker
 end
 
-api.workerrm = function(session,index,customworkerlist)
-    local wlist = session.workerlist[customworkerlist] or session.workerlist.main
+api.workerrm = function(session,index,custompipeline)
+    local wlist = session.pipeline[custompipeline] or session.pipeline.main
     index = index or 1
     if type(index) == 'string' then
         for i, v in ipairs(wlist) do
@@ -69,17 +74,17 @@ api.workerrm = function(session,index,customworkerlist)
         end
     end
     wlist[index] = nil
-    if customworkerlist then
-        session.workerlist[customworkerlist] = session.api.array.clear(wlist)
+    if custompipeline then
+        session.pipeline[custompipeline] = session.api.array.clear(wlist)
     else
-        session.workerlist.main = session.api.array.clear(wlist)
+        session.pipeline.main = session.api.array.clear(wlist)
     end
 end
 
 api.workerreplace = function(session,position,workername,optnewid) 
     local reference
     if type(position) == 'string' then
-        for k, v in pairs(session.workerlist.main) do
+        for k, v in pairs(session.pipeline.main) do
             if v.id == position then
                 reference = v
             end
@@ -88,7 +93,7 @@ api.workerreplace = function(session,position,workername,optnewid)
             return
         end
     end
-    reference = reference or session.workerlist.main[position]
+    reference = reference or session.pipeline.main[position]
     reference.func = session.data.worker[workername]
     reference.id = optnewid or reference.id
     return reference
@@ -145,7 +150,7 @@ api.new = {
     session = function()
         local session = 
         {
-            workerlist = {main={}},
+            pipeline = {main={}},
             temp = {},
             run = api.run,
             process = api.process,
@@ -210,15 +215,17 @@ api.legacyrun = function(session, command)
     return result
 end
 
-api.run = function(session, command, workerlist)
+api.run = function(session, command, pipeline)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
         
-        result = session:process(cmd,workerlist or session.workerlist.sysprocessor) or '' -- workerlist can be nil ofc
+        result = session:process(cmd,pipeline or session.pipeline.sysprocessor) or '' -- pipeline can be nil ofc
         --print('cmd:' .. api.string.split(cmd,' ')[1] .. '\nreturn:' .. result)
     end
     return result
 end
+
+api.version = '0.5.2'
 
 return api

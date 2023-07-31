@@ -83,7 +83,7 @@
 ## plec - Syntax
 
 - `@variable` : is replaced by the _variable_ value
-- `wl!wl2!wl3` : this set the current command to run on _wl_ _wl2_ _wl3_ workerlists
+- `wl!wl2!wl3` : this set the current command to run on _wl_ _wl2_ _wl3_ pipelines
 - `([command])` : run _command_ on plec layer
 - `;` : separate commands, finish the command and start a new one
 
