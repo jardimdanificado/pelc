@@ -153,6 +153,10 @@ raylib.cmd['close'] = function()
     rl.CloseWindow()
 end
 
+raylib.cmd['fontsize'] = function(session,args)
+    session.scene.current.size.text = tonumber(args[1])
+end
+
 raylib.cmd.consolemode = function(session)
     local quit = false
     session.cmd.exit = function()
@@ -181,7 +185,7 @@ raylib.cmd.consolemode = function(session)
             logs[#logs].file = text.file
             text.file = ''
             
-        elseif rl.IsKeyDown(259) then -- backspace
+        elseif rl.IsKeyPressed(259) then -- backspace
             text.file = string.sub(text.file,1,#text.file-1)
         elseif rl.GetKeyPressed() ~= 0 then
             text.file = text.file .. string.char(rl.GetCharPressed())

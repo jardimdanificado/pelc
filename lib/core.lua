@@ -170,7 +170,6 @@ core.worker.unref = function(session, cmd)
     return cmd
 end
 
-
 core.worker.cleartemp = function(session,cmd)
     if not session.temp.keep then        
         session.temp = {}
