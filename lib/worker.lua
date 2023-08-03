@@ -4,13 +4,13 @@ lib.cmd['worker.add'] = function(session,args)
     if not session.data.worker[args[1]] then
         print(args[1] .. ' command do not exist.')
     else
-        session:workeradd(args[1], args[2], args[3])
+        session:workeradd(args[1], args[2], args[3],args[4])
     end
 end
 
 lib.cmd["worker.help"] = function(session,args)
     print("\27[32mworkers:\27[0m")
-    for k, v in pairs(session.workerlist[args[1]] or session.workerlist.main) do
+    for k, v in pairs(session.pipeline[args[1]] or session.pipeline.main) do
         print('[' .. k .. '] : ' .. v.id .. ',')
     end
     print('--end')

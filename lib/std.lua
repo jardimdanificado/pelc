@@ -58,4 +58,12 @@ std.cmd["---"] = function(session,args)
     return txt
 end
 
+std.cmd.pipe = function(session,args)
+    local pipe = args[1] or 'sysprocessor'
+    args[1] = nil
+    args = session.api.array.clear(args)
+    local cmd = table.concat(args,' ')
+    session:run(cmd, session.pipeline[pipe])
+end
+
 return std

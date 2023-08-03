@@ -1,7 +1,7 @@
 local example = require 'lib.std'
 
 example.setup = function(session)
-    session.workerlist.custom = 
+    session.pipeline.custom = 
     {
         {
             id = 'spaceandclean',
@@ -13,7 +13,7 @@ example.setup = function(session)
             end
         }
     }
-    session.workerlist.custom2 = 
+    session.pipeline.custom2 = 
     {
         {
             id = 'spaceandclean',

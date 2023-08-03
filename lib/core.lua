@@ -15,7 +15,7 @@ core.cmd.set = function(session, args, cmd)
     local function setNestedValue(table, keys, value)
         local currentTable = table
         for i = 1, #keys - 1 do
-            local key = keys[i]
+            local key = tonumber(keys[i]) or keys[i]
             if not currentTable[key] or type(currentTable[key]) ~= "table" then
                 currentTable[key] = {}
             end
@@ -48,6 +48,20 @@ core.cmd.set = function(session, args, cmd)
             session.data[args[1]] = newcmd
         end
     end
+end
+
+core.cmd.get = function(session, args, cmd)
+    local keys = {}
+    local curr = session.data
+    if session.api.string.includes(args[1],'.') then
+        for key in args[1]:gmatch("([^%.]+)") do
+            table.insert(keys, key)
+        end
+    end
+    for i, v in ipairs(keys) do
+        curr = curr[tonumber(v) or v]
+    end
+    return curr
 end
 
 core.cmd.unset = function(session, args)
@@ -204,10 +218,10 @@ core.worker["!"] = function(session,cmd)
                     break
                 end
                 local wlname = session.api.string.replace(v,"!")
-                if session.workerlist[wlname] then
-                    newcmd = session:run(session.api.string.replace(newcmd,v),session.workerlist[wlname])
+                if session.pipeline[wlname] then
+                    newcmd = session:run(session.api.string.replace(newcmd,v),session.pipeline[wlname])
                 else
-                    print("workerlist " .. wlname .. " does not exist.")
+                    print("pipeline " .. wlname .. " does not exist.")
                 end
             end
             return session.api.string.replace(cmd,splited[1] .. "%s+")

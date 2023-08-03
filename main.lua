@@ -2,7 +2,7 @@ package.path = "./?.raw;" .. package.path
 
 local api = require("src.api")
 
-print(api.luaversion() .. ", plec 0.5.1")
+print(api.luaversion() .. ", plec " .. api.version)
 
 local session = api.new.session() -- everything happen inside this
 
@@ -14,11 +14,14 @@ session:workeradd("=>","_=>") -- autodef wrapper
 session:workeradd("=","_=") -- set wrapper
 session:workeradd("unwrapcmd","_unwrap") -- unwrap a command ([command])
 session:workeradd('unref',"_unref") -- unref a variable @variable
-session:workeradd("!","_!") -- multi-workerlist operator wl1!wl2!wl3!wl4
+session:workeradd("!","_!") -- multi-pipeline operator wl1!wl2!wl3!wl4
 session:workeradd("spacendclean","_removeStartAndEndSpaces") -- name says everything
 session:workeradd("cmdname","_cmdname") -- sets session.temp.cmdname
 session:workeradd("segfault","_segFault") -- throw errors
 session:workeradd("commander","_commander") -- split args then run the command
+
+session.pipeline.sysprocessor = session.pipeline.main
+session.pipeline.main = {}
 
 session.run = api.run -- disable the legacy runner
 
@@ -35,7 +38,7 @@ api.file.save.text('changed.txt', api.encode.base64Decode(api.encode.load("abc.t
 
 -- console loop
 while not session.temp.exit do
-    session:run()
+    session:run(nil,session.pipeline.sysprocessor)
 end
 
 session.temp.exit = nil
