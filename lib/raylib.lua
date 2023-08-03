@@ -3,7 +3,30 @@ local raylib =
     cmd = {},
     worker = {}
 }
-
+--[[ nix packages in order to make plec + raylib run in replit
+    { pkgs }: {
+	deps = [
+        pkgs.luajit
+        pkgs.luajitPackages.luarocks
+        pkgs.lua
+        pkgs.sumneko-lua-language-server
+		pkgs.clang_12
+	    pkgs.ccls
+	    pkgs.gcc
+	    pkgs.glibc
+	    pkgs.mesa
+		pkgs.xorg.libX11
+		pkgs.libGL
+		pkgs.libGLU
+		pkgs.glfw
+		pkgs.xorg.libXcursor
+		pkgs.xorg.libXrandr
+		pkgs.xorg.libXinerama
+		pkgs.xorg.libXi
+		pkgs.xorg.libXext
+	];
+}
+]]
 raylib.preload = function(session)
     if not rl then 
         gl = session.api.gl
