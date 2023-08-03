@@ -228,7 +228,7 @@ api.run = function(session, command, pipeline)
     return result
 end
 
-api.version = '0.5.5'
+api.version = '0.5.6'
 
 api.gl = '21'
 

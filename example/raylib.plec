@@ -10,6 +10,6 @@ worker.lhelp;
 scene.cube.1.size.x = 4;
 echo ([> ([get scene.cube.1.size.x]) + 1]);
 -- new.text 10 10 15 asdaakdka mdasmdkas dkamdkmaskm dasdmm;
-consolemode;
+rendermode;
 close;
 exit;

@@ -118,7 +118,8 @@ raylib.cmd['new.text'] = function(session,args)
         start = 4
         text.size = tonumber(args[3])
     end
-    for i = start, #args do
+    text.file = text.file .. (args[start] or '')
+    for i = start+1, #args do
         text.file = text.file .. ' ' .. args[i]
     end
     
@@ -166,16 +167,22 @@ end
 
 raylib.cmd.consolemode = function(session)
     local quit = false
-    session.cmd.exit = function()
+    session.cmd.back = function()
         quit = true
     end
+    session.cmd.exit = function()
+        session.temp.quit = true
+        quit = true
+    end
+    session.scene.current._text = session.scene.current.text
+    session.scene.current.text = session.scene.current.consoletext or {}
     local txtsize = session.scene.current.size.text
     local lastline = (session.window.size.y - txtsize)
-    
-    local text = session:run('new.text ' .. txtsize .. ' ' .. lastline .. ' a')
-    local logs = {}
-    session:run('new.text 0 ' .. lastline .. ' > ')
-    text.file = ''
+    local juststarted = true
+    local text = session:run('new.text ' .. txtsize/1.8 .. ' ' .. lastline)
+    local logs = {session:run('new.text 0 ' .. (session.window.size.y - (txtsize)*2) .. ' console mode activated.')}
+    logs[1].file = 'console mode activated.'
+    local barra = session:run('new.text ' .. txtsize/7 .. ' ' .. lastline .. ' >')
     while not quit do
         if rl.IsKeyPressed(rl.KEY_ENTER) then
             session:run(text.file)
@@ -192,14 +199,37 @@ raylib.cmd.consolemode = function(session)
             logs[#logs].file = text.file
             text.file = ''
             
-        elseif rl.IsKeyPressed(259) then -- backspace
+        elseif rl.IsKeyPressed(rl.KEY_BACKSPACE) then 
             text.file = string.sub(text.file,1,#text.file-1)
-        elseif rl.GetKeyPressed() ~= 0 then
+        elseif rl.IsKeyPressed(rl.KEY_F1) then 
+            if not juststarted then
+                quit = true
+            else
+                juststarted = false
+            end
+            
+        elseif rl.GetKeyPressed() > 0 and not rl.IsKeyPressed(rl.KEY_F1) then
             text.file = text.file .. string.char(rl.GetCharPressed())
         end
         session.api.run(session,'',session.pipeline.render)
     end
+    for k, v in pairs(session.scene.current.text) do
+        if v.file == '>' then
+            session.scene.current.text[k] = nil
+        end
+    end
+    session.scene.current.text = session.scene.current._text
+    session.scene.current._text = nil
     session.cmd.exit = session.data.cmd.exit
+end
+
+raylib.cmd.rendermode = function(session)
+    while not rl.WindowShouldClose() and not session.temp.quit do
+        if rl.IsKeyPressed(rl.KEY_F1) then
+            session:run('consolemode')
+        end
+        session.api.run(session,'',session.pipeline.render)
+    end
 end
 
 raylib.worker.close = function(session)
