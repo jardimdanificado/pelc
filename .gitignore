@@ -2,3 +2,5 @@
 build
 *.raw
 *.out
+*_out
+./luajit

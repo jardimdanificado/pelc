@@ -5,6 +5,11 @@ local raylib =
 }
 
 raylib.preload = function(session)
+    if not rl then 
+        rl = require "src.raylib" 
+    end
+    session.api.raylib = rl -- raylib-lua set a global rl variable so you dont really need this session one
+    session.data.raylib = true
     session.data.file = 
     {
 
@@ -240,26 +245,20 @@ raylib.worker.enddraw = function()
 end
 
 raylib.setup = function(session)
-    if rl ~= nil then
-        session.api.raylib = rl -- raylib-lua set a global rl variable so you dont really need this session one
-        session.data.raylib = true
-        session.pipeline._main = session.pipeline.main
-        session.pipeline.main = {}
-        session:workeradd('close','_close')
-        session:workeradd('startdraw','_startdraw')
-        session:workeradd('clearbg','_clearbg')
-        session:workeradd('start3d','_start3d')
-        session:workeradd('drawcube','_drawcube')
-        session:workeradd('end3d','_end3d')
-        session:workeradd('drawtxt','_drawtxt')
-        session:workeradd('enddraw','_enddraw')
+    session.pipeline._main = session.pipeline.main
+    session.pipeline.main = {}
+    session:workeradd('close','_close')
+    session:workeradd('startdraw','_startdraw')
+    session:workeradd('clearbg','_clearbg')
+    session:workeradd('start3d','_start3d')
+    session:workeradd('drawcube','_drawcube')
+    session:workeradd('end3d','_end3d')
+    session:workeradd('drawtxt','_drawtxt')
+    session:workeradd('enddraw','_enddraw')
 
-        session.pipeline.render = session.pipeline.main
-        session.pipeline.main = session.pipeline._main
-        session.pipeline._main = nil
-    else
-        print("raylib is not avaliable.")
-    end
+    session.pipeline.render = session.pipeline.main
+    session.pipeline.main = session.pipeline._main
+    session.pipeline._main = nil
     session:run('new.scene')
     session:run('set.scene 1')
 end
