@@ -110,6 +110,8 @@ api.arghandler = function(session,args)
             skip = "import "
         elseif api.string.includes(v,'-l') then
             api.legacyrun(session,"require lib." .. api.string.replace(v,'-l',''))
+        elseif api.string.includes(v,'-gl') then
+            api.gl = api.string.replace(v,'-gl','')
         elseif api.string.includes(v,'.plec') then
             table.insert(laterscript,v)
         end
@@ -226,6 +228,8 @@ api.run = function(session, command, pipeline)
     return result
 end
 
-api.version = '0.5.4'
+api.version = '0.5.5'
+
+api.gl = '21'
 
 return api

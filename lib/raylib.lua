@@ -6,7 +6,9 @@ local raylib =
 
 raylib.preload = function(session)
     if not rl then 
+        gl = session.api.gl
         rl = require "src.raylib" 
+        gl = nil
     end
     session.api.raylib = rl -- raylib-lua set a global rl variable so you dont really need this session one
     session.data.raylib = true

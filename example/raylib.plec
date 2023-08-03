@@ -1,7 +1,7 @@
 require raylib std worker;
 exposes;
 a = 5 0 0 1 1 1 red true;
-setflag FLAG_VSYNC_HINT;
+set.flag FLAG_VSYNC_HINT;
 new.window 800 400;
 color.background white;
 new.cube @a;
