@@ -1,44 +1,58 @@
 package.path = "./?.raw;" .. package.path
 
-local api = require("src.api")
+--print(api.luaversion() .. ", plec " .. api.version)
 
-print(api.luaversion() .. ", plec " .. api.version)
-
-local session = api.new.session() -- everything happen inside this
-
-api.legacyrun(session,"require core") --lib containing the basics to set a working console, its also included in std
-
--- workers, these are used to modify commands and do turned actions
-session:workeradd("cleartemp","_cleartemp") -- clears session.temp
-session:workeradd("=>","_=>") -- autodef wrapper
-session:workeradd("=","_=") -- set wrapper
-session:workeradd("unwrapcmd","_unwrap") -- unwrap a command ([command])
-session:workeradd('unref',"_unref") -- unref a variable @variable
-session:workeradd("!","_!") -- multi-pipeline operator wl1!wl2!wl3!wl4
-session:workeradd("spacendclean","_removeStartAndEndSpaces") -- name says everything
-session:workeradd("cmdname","_cmdname") -- sets session.temp.cmdname
-session:workeradd("segfault","_segFault") -- throw errors
-session:workeradd("commander","_commander") -- split args then run the command
-
-session.pipeline.sysprocessor = session.pipeline.main
-session.pipeline.main = {}
-
-session.run = api.run -- disable the legacy runner
-
-api.arghandler(session,arg) --name says everything, this handle the console arguments
+local api = require("src.api") -- everything happen inside this
+local session = api.new.session(600,480)
 
 
 -- print(api.run, session.run, api.legacyrun)
---session.api.visualtable(session) -- uncomment this to see how session hierarchy look like
+-- api.visualtable(session) -- uncomment this to see how session hierarchy look like
 
 --[[ uncomment this to test encryption
 api.encode.save('abc.txt',api.encode.base64Encode(api.stringify(session,4)),0451)
 api.file.save.text('changed.txt', api.encode.base64Decode(api.encode.load("abc.txt",0451)))
 --]]
 
--- console loop
-while not session.temp.exit do
-    session:run(nil,session.pipeline.sysprocessor)
+local function teclado(session)
+    if(rl.IsKeyDown(rl.KEY_PAGE_UP)) then
+        session.scene.camera.position.y = session.scene.camera.position.y + 0.000000001
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_PAGE_DOWN)) then
+        session.scene.camera.position.y = session.scene.camera.position.y - 0.000000001
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_UP)) then
+        session.scene.camera.target.y = session.scene.camera.target.y + 0.000000001
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_DOWN)) then
+        session.scene.camera.target.y = session.scene.camera.target.y - 0.000000001
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_RIGHT)) then
+        session.scene.camera.position = api.math.rotate(session.scene.camera.position,session.scene.camera.target,-0.000000001)
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_LEFT)) then
+        session.scene.camera.position = api.math.rotate(session.scene.camera.position,session.scene.camera.target,0.000000001)
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_PERIOD)) then
+        session.scene.camera.fovy = session.scene.camera.fovy - 1
+        rl.UpdateCamera(session.scene.camera)
+    elseif(rl.IsKeyDown(rl.KEY_COMMA)) then
+        session.scene.camera.fovy = session.scene.camera.fovy + 1
+        rl.UpdateCamera(session.scene.camera)
+    elseif rl.IsKeyPressed(rl.KEY_F1) then
+        session.console.active = true
+    end
 end
 
+session:run('randomcubes')
+
+while not rl.WindowShouldClose() and not session.temp.exit do
+    teclado(session)
+    if session.console.active then
+        session.console.loop(session)
+        session.console.active = false
+    end
+    session.api.process(session,'',session.pipeline.render)
+end
+rl.CloseWindow()
 session.temp.exit = nil

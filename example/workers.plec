@@ -1,7 +1,0 @@
-require std worker time; -- you can require any libs you want with a single require command, same applies to import;
-w = worker;
-@w.help;
-@w.lhelp;
-@w.rm _=;
-@w.help;
-exit
