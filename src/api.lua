@@ -1,3 +1,28 @@
+--[[ nix packages in order to make plec + raylib run in replit
+    { pkgs }: {
+	deps = [
+        pkgs.luajit
+        pkgs.luajitPackages.luarocks
+        pkgs.lua
+        pkgs.sumneko-lua-language-server
+		pkgs.clang_12
+	    pkgs.ccls
+	    pkgs.gcc
+	    pkgs.glibc
+	    pkgs.mesa
+		pkgs.xorg.libX11
+		pkgs.libGL
+		pkgs.libGLU
+		pkgs.glfw
+		pkgs.xorg.libXcursor
+		pkgs.xorg.libXrandr
+		pkgs.xorg.libXinerama
+		pkgs.xorg.libXi
+		pkgs.xorg.libXext
+	];
+}
+]]
+
 local api = require('src.util')
 
 api.formatcmd = function(command)
@@ -37,17 +62,17 @@ api.process = function(session, cmd, pipeline)
     return result
 end
 
-api.workeradd = function(session,name,position,newid,custompipeline) 
+api.pipeadd = function(session,name,position,newid,custompipeline) 
     local wlist = session.pipeline[custompipeline or 'main']
-
-    local worker = 
+    print(session.pipes[name],name)
+    local pipe = 
     {
         id = '',
-        func = session.data.worker[name or ''].func or ''
+        func = session.pipes[name or ''] or ''
     }
 
     if type(name) == 'function' then
-        worker.func = name
+        pipe.func = name
         name = session.api.id()
     end
 
@@ -58,144 +83,10 @@ api.workeradd = function(session,name,position,newid,custompipeline)
         position = #wlist+1 
     end
     
-    worker.id = newid or name
-    table.insert(wlist,position,worker)
-    return worker
+    pipe.id = newid or name
+    table.insert(wlist,position,pipe)
+    return pipe
 end
-
-api.workerrm = function(session,index,custompipeline)
-    local wlist = session.pipeline[custompipeline] or session.pipeline.main
-    index = index or 1
-    if type(index) == 'string' then
-        for i, v in ipairs(wlist) do
-            if v.id == index then
-                index = i
-            end
-        end
-    end
-    wlist[index] = nil
-    if custompipeline then
-        session.pipeline[custompipeline] = session.api.array.clear(wlist)
-    else
-        session.pipeline.main = session.api.array.clear(wlist)
-    end
-end
-
-api.workerreplace = function(session,position,workername,optnewid) 
-    local reference
-    if type(position) == 'string' then
-        for k, v in pairs(session.pipeline.main) do
-            if v.id == position then
-                reference = v
-            end
-        end
-        if not reference then
-            return
-        end
-    end
-    reference = reference or session.pipeline.main[position]
-    reference.func = session.data.worker[workername]
-    reference.id = optnewid or reference.id
-    return reference
-end
-
-api.arghandler = function(session,args)
-    local laterscript = {}
-    local skip = false
-    for i, v in ipairs(args or {}) do
-        if skip ~= false then
-            api.legacyrun(session, skip .. v)
-            skip = false
-        elseif v == '-l' then
-            skip = "import "
-        elseif api.string.includes(v,'-l') then
-            api.legacyrun(session,"require lib." .. api.string.replace(v,'-l',''))
-        elseif api.string.includes(v,'-gl') then
-            api.gl = api.string.replace(v,'-gl','')
-        elseif api.string.includes(v,'.plec') then
-            table.insert(laterscript,v)
-        end
-    end
-    for i, v in ipairs(laterscript) do
-        api.run(session,api.file.load.text(v))
-    end
-end
-
-api.loadcmds = function(session,templib)
-    templib.worker = templib.worker or {}
-    if session.data.preload and templib.preload ~= nil then
-        templib.preload(session)
-    end
-    if templib.cmd then
-        for k, v in pairs(templib.cmd) do
-            session.data.cmd[k] = v
-            session.cmd[k] = session.data.cmd[k]
-        end
-    end
-    if templib.worker then
-        for k, func in pairs(templib.worker) do
-            session.data.worker[k] = api.new.worker(func,k)
-        end
-    end
-    if session.data.setup and templib.setup ~= nil then
-        templib.setup(session)
-    end
-end
-
-api.new = {
-    worker = function(func,id)
-        return {
-            func = func,
-            id = id
-        }
-    end,
-    session = function()
-        local session = 
-        {
-            pipeline = {main={}},
-            temp = {},
-            run = api.run,
-            process = api.process,
-            workeradd = api.workeradd,
-            workerrm = api.workerrm,
-            api = api,
-            cmd = {},
-            data = 
-            {
-                preload = true,
-                setup = true,
-                cmd = 
-                {
-                    require = function(session,args)
-                        local templib
-                        for k, v in pairs(args) do
-                            if not session.api.string.includes(v,'lib.') and not session.api.string.includes(v,'/') and not session.api.string.includes(v,'\\') then
-                                templib = require('lib.' .. v)
-                            else
-                                templib = require(
-                                    session.api.string.replace(
-                                        session.api.string.replace(
-                                            session.api.string.replace(v,'.lua',''),'/','.'),'\\','.'))
-                            end
-                            session.api.loadcmds(session,templib)
-                        end
-                    end,
-                    import = function(session,args)
-                        for k, v in pairs(args) do
-                            if not session.api.file.exist(v) then
-                                return
-                            end
-                            session.api.loadcmds(session,dofile(v))
-                        end
-                    end
-                },
-                worker = {}
-            }
-        }
-        session.cmd = api.array.clone(session.data.cmd)
-        return session
-    end
-}
 
 api.getline = function()
     io.write("> ")
@@ -203,7 +94,7 @@ api.getline = function()
     return str
 end
 
-api.legacyrun = function(session, command)
+api.run = function(session, command)
     command = command or api.getline()
     local result = ''
     for i, cmd in ipairs(api.formatcmd(command)) do
@@ -217,19 +108,194 @@ api.legacyrun = function(session, command)
     return result
 end
 
-api.run = function(session, command, pipeline)
-    command = command or api.getline()
-    local result = ''
-    for i, cmd in ipairs(api.formatcmd(command)) do
-        
-        result = session:process(cmd,pipeline or session.pipeline.sysprocessor) or '' -- pipeline can be nil ofc
-        --print('cmd:' .. api.string.split(cmd,' ')[1] .. '\nreturn:' .. result)
+api.new = 
+{
+    scene = function(session,_type)
+        _type = _type or '3d'
+        local _3d = _type == '3d' and true or false
+        local scene =  
+        {
+            type = _type,
+            text = {},
+            image = {},
+            model = _3d and {} or nil,
+            cube = _3d and {} or nil,
+            backgroundcolor = rl.LIGHTGRAY,
+            camera = rl.new("Camera", {
+                position = rl.new("Vector3", 0, 10, 10),
+                target = rl.new("Vector3", 0, 0, 0),
+                up = rl.new("Vector3", 0, 1, 0),
+                fovy = 45,
+                type = rl.CAMERA_PERSPECTIVE
+            }),
+        }
+        table.insert(session.scenes,scene)
+        return scene
+    end,
+    text = function(session,text,px,py,color,size)
+        local text = {file=text,position={x=px or 0,y=py or 0},color = color or rl.BLACK, size or 20}
+        table.insert(session.scene.text,text)
+        return text
     end
-    return result
+}
+
+api.set = 
+{
+    scene = function(session,index)
+        session.scene = session.scenes[index]
+    end
+}
+
+api.consolemode = function(session)
+    local quit = false
+    session.cmd.back = function()
+        quit = true
+    end
+    session.cmd.exit = function()
+        session.temp.quit = true
+        quit = true
+    end
+    session.scene._text = session.scene.text
+    session.scene.text = session.scene.consoletext or {}
+    local txtsize = 20
+    local lastline = (session.window.height - txtsize)
+    local juststarted = true
+    local text = api.new.text(session,'',txtsize/1.8 , lastline)
+    local logs = {api.new.text(session,'console mode activated.',0,(session.window.height - (txtsize)*2))}
+    local barra = api.new.text(session,">", txtsize/7, lastline)
+    while not quit do
+        if rl.IsKeyPressed(rl.KEY_ENTER) then
+            session:run(text.file)
+            for k, txt in ipairs(logs) do
+                
+                if txt.position.y - txtsize <= 0 then
+                    txt.file = ''
+                else
+                    
+                    txt.position.y = txt.position.y - txtsize
+                    
+                end
+
+            end
+            table.insert(logs,api.new.text(session,'', 0, text.position.y - txtsize))
+            logs[#logs].file = text.file
+            text.file = ''
+            
+        elseif rl.IsKeyPressed(rl.KEY_BACKSPACE) then 
+            text.file = string.sub(text.file,1,#text.file-1)
+        elseif rl.IsKeyPressed(rl.KEY_F1) then 
+            if not juststarted then
+                quit = true
+            else
+                juststarted = false
+            end
+            
+        elseif rl.GetKeyPressed() > 0 and not rl.IsKeyPressed(rl.KEY_F1) then
+            text.file = text.file .. string.char(rl.GetCharPressed())
+        end
+        session.api.process(session,'',session.pipeline.render)
+    end
+    for k, v in pairs(session.scene.text) do
+        if v.file == '>' then
+            session.scene.text[k] = nil
+        end
+    end
+    session.scene.text = session.scene._text
+    session.scene._text = nil
 end
 
-api.version = '0.5.6'
+api.startup = function(session)
+    for i, v in ipairs(arg or {}) do
+        if api.string.includes(v,'-gl') then
+            api.gl = api.string.replace(v,'-gl','')
+        end
+    end
+    if not rl then 
+        gl = api.gl
+        rl = require "lib.raylib"
+        gl = nil
+    end
+end
+
+api.version = '0.0.1'
 
 api.gl = '21'
+
+api.new.session = function(width,height,title,flags)
+    --[[
+        FLAG_VSYNC_HINT, 
+        FLAG_FULLSCREEN_MODE, 
+        FLAG_WINDOW_RESIZABLE, 
+        FLAG_WINDOW_UNDECORATED, 
+        FLAG_WINDOW_HIDDEN, 
+        FLAG_WINDOW_MINIMIZED, 
+        FLAG_WINDOW_MAXIMIZED, 
+        FLAG_WINDOW_UNFOCUSED, 
+        FLAG_WINDOW_TOPMOST, 
+        FLAG_WINDOW_ALWAYS_RUN, 
+        FLAG_WINDOW_TRANSPARENT, 
+        FLAG_WINDOW_HIGHDPI, 
+        FLAG_WINDOW_MOUSE_PASSTHROUGH, 
+        FLAG_BORDERLESS_WINDOWED_MODE, 
+        FLAG_MSAA_4X_HINT, 
+        FLAG_INTERLACED_HINT
+    ]]
+    flags = flags or {}
+    local session =
+    {
+        pipes = require 'src.pipes',
+        pipeadd= api.pipeadd,
+        pipeline = 
+        {
+            main={}
+        },
+        process = api.process,
+        run = api.run,
+        api = api,
+        console = 
+        {
+            logs = {},
+            active = false
+        },
+        window = 
+        {
+            width = 320,
+            height = 240,
+            title = ('maqquina' .. api.version)
+        },
+        scenes = {},
+        scene = {},
+        data = {},
+        temp = {},
+        cmd = 
+        {
+            ['--'] = function() end
+        }
+    }
+
+    session:pipeadd('close','_close')
+    session:pipeadd('startdraw','_startdraw')
+    session:pipeadd('clearbg','_clearbg')
+    session:pipeadd('start3d','_start3d')
+    session:pipeadd('drawcube','_drawcube')
+    session:pipeadd('end3d','_end3d')
+    session:pipeadd('drawtxt','_drawtxt')
+    session:pipeadd('enddraw','_enddraw')
+
+    session.pipeline.render = session.pipeline.main
+    session.pipeline.main = {}
+    
+    api.startup(session)
+    session.scene = api.new.scene(session,'3d')
+    for i, v in ipairs(flags) do
+        rl.SetFlag(v)
+    end
+
+    session.window.width = width or session.window.width
+    session.window.height = height or session.window.height
+    session.window.title = title or session.window.title
+    rl.InitWindow(session.window.width, session.window.height, session.window.title)
+    return session
+end
 
 return api

@@ -1,44 +1,24 @@
 package.path = "./?.raw;" .. package.path
 
-local api = require("src.api")
+--print(api.luaversion() .. ", plec " .. api.version)
 
-print(api.luaversion() .. ", plec " .. api.version)
-
-local session = api.new.session() -- everything happen inside this
-
-api.legacyrun(session,"require core") --lib containing the basics to set a working console, its also included in std
-
--- workers, these are used to modify commands and do turned actions
-session:workeradd("cleartemp","_cleartemp") -- clears session.temp
-session:workeradd("=>","_=>") -- autodef wrapper
-session:workeradd("=","_=") -- set wrapper
-session:workeradd("unwrapcmd","_unwrap") -- unwrap a command ([command])
-session:workeradd('unref',"_unref") -- unref a variable @variable
-session:workeradd("!","_!") -- multi-pipeline operator wl1!wl2!wl3!wl4
-session:workeradd("spacendclean","_removeStartAndEndSpaces") -- name says everything
-session:workeradd("cmdname","_cmdname") -- sets session.temp.cmdname
-session:workeradd("segfault","_segFault") -- throw errors
-session:workeradd("commander","_commander") -- split args then run the command
-
-session.pipeline.sysprocessor = session.pipeline.main
-session.pipeline.main = {}
-
-session.run = api.run -- disable the legacy runner
-
-api.arghandler(session,arg) --name says everything, this handle the console arguments
+local api = require("src.api") -- everything happen inside this
+local session = api.new.session(600,480,'o estado novo')
 
 
 -- print(api.run, session.run, api.legacyrun)
---session.api.visualtable(session) -- uncomment this to see how session hierarchy look like
+-- api.visualtable(session) -- uncomment this to see how session hierarchy look like
 
 --[[ uncomment this to test encryption
 api.encode.save('abc.txt',api.encode.base64Encode(api.stringify(session,4)),0451)
 api.file.save.text('changed.txt', api.encode.base64Decode(api.encode.load("abc.txt",0451)))
 --]]
 
--- console loop
-while not session.temp.exit do
-    session:run(nil,session.pipeline.sysprocessor)
+while not rl.WindowShouldClose() and not session.temp.quit do
+    if rl.IsKeyPressed(rl.KEY_F1) then
+        session.api.consolemode(session)
+    end
+    session.api.process(session,'',session.pipeline.render)
 end
 
 session.temp.exit = nil

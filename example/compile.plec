@@ -1,4 +1,0 @@
-set setup false;
-require compile;
-compile -Jluajit -Cclang -V -I/usr/include/luajit-2.1; -- -V set vitrine/demo mode true;
-exit;
