@@ -17,11 +17,11 @@ local lib = ""  -- Keep this empty so it changed when this file loaded/required 
 
 -- Get OS and architecture to set library file to use
 if sys == "Windows" then
-    lib = ("lib\\raylib\\raylib.gl" .. gl .. ".dll")
+    lib = ("lib\\".. sys .. '/' .. arch ..  "\\raylib.gl" .. gl ..  ".dll")
 elseif sys == "OSX" then
-  lib = "./lib/raylib/libraylib.gl" .. gl .. ".dylib"
+  lib = "./lib/".. sys .. '/' .. arch ..  "/libraylib.gl" .. gl .. ".dylib"
 else
-  lib = "./lib/raylib/libraylib.gl" .. gl .. ".so"
+  lib = "./lib/".. sys .. '/' .. arch ..  "/libraylib.gl" .. gl .. ".so"
 end
 
 -- raylib.h
