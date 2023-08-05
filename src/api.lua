@@ -24,7 +24,6 @@
 ]]
 
 local api = require('src.util')
-
 api.formatcmd = function(command)
     command = command:gsub("%s+", " ")
     command = command:gsub('; ', ';')
@@ -168,7 +167,9 @@ api.startup = function()
     end
     if not rl then 
         gl = api.gl
+        sysarch = api.arch
         rl = require "lib.raylib"
+        sysarch = nil
         gl = nil
     end
 end
