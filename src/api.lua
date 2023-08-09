@@ -92,6 +92,48 @@ api.getline = function()
     return str
 end
 
+api.checklibcache = function(session,path)
+    if not session.cache.lib[path] then
+        session.cache.lib[path] = require(path)
+    else
+        print(path .. ' is already cached.')
+    end
+end
+
+api.requirecmd = function(session,path)
+    api.checklibcache(session,path)
+    for k, v in pairs(session.cache.lib[path]) do
+        session.cmd[k] = v
+    end
+end
+
+api.requirepipe = function(session,path)
+    api.checklibcache(session,path)
+    for k, v in pairs(session.cache.lib[path]) do
+        session.pipes[k] = v
+    end
+end
+
+api.importcmd = function(session,path)
+    if session.cache.lib[path] then
+        print(path .. ' recached.')
+    end
+    session.cache.lib[path] = dofile(path)
+    for k, v in pairs(session.cache.lib[path]) do
+        session.cmd[k] = v
+    end
+end
+
+api.importpipe = function(session,path)
+    if session.cache.lib[path] then
+        print(path .. ' recached.')
+    end
+    session.cache.lib[path] = dofile(path)
+    for k, v in pairs(session.cache.lib[path]) do
+        session.pipes[k] = v
+    end
+end
+
 api.run = function(session, command, pipeline)
     command = command or api.getline()
     local result = ''
@@ -167,9 +209,7 @@ api.startup = function()
     end
     if not rl then 
         gl = api.gl
-        sysarch = api.arch
         rl = require "lib.raylib"
-        sysarch = nil
         gl = nil
     end
 end
@@ -221,6 +261,7 @@ api.new.session = function(width,height,title,flags)
         scenes = {},
         scene = {},
         data = {},
+        cache = {lib = {}},
         temp = {},
         cmd = require "src.commands",
         defaults = 

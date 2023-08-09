@@ -143,6 +143,7 @@ console.loop = function(session)
         lastclock = math.floor(os.clock()*50)
         local keypress = rl.GetKeyPressed()
         local charpress = rl.GetCharPressed()
+        --keyboard
         if (rl.IsKeyPressed(rl.KEY_ENTER) and lastclock ~= clock and console.buffer.file ~= '') then
             session:run(console.buffer.file,session.pipeline.parser)
             for k, txt in pairs(console.logs) do
