@@ -1,7 +1,7 @@
 local console = {}
 console.logs = {}
 console.virgin = true 
-console.active = true
+console.active = false
 console.key = {
     [0] = "KEY_NULL",
     [39] = "KEY_APOSTROPHE",

@@ -46,12 +46,6 @@ _table.mod = function(arr1, arr2)
     end
 end
 
-_table.sub = function(arr1, arr2)
-    for k, v in pairs(arr2) do
-        arr1[k] = arr2[k] - arr2[k]
-    end
-end
-
 _table.merge = function(arr1,arr2)
     for k, v in pairs(arr2) do
         arr1[k] = arr2[k]

@@ -125,7 +125,7 @@ end
 
 cmd.randomcubes = function(session,args)
     for i = 1, session.api.random(args[1] or 3, args[2] or 21), 1 do
-        session.api.new.cube(session,0,0,0,1,1,1)
+        session.api.autonew.cube(session,0,0,0,1,1,1)
     end
     cmd.shufflecubes(session)
 end
