@@ -57,6 +57,8 @@ _table.recurse = function (arr,subname)
 end
 
 _table.move = function(tbl, fromIndex, toIndex)
+    fromIndex = fromIndex or 0
+    toIndex = toIndex or 0
     if type(tbl) ~= "table" then
         error("The provided argument is not a table.")
     end

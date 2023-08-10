@@ -112,13 +112,14 @@ console.key = {
 }
 
 console.loop = function(session)
-    session.temp.quit = false
+    session.console.active = true
     session.cmd.back = function()
-        session.temp.quit = true
+        session.console.active = false
+        --console.buffer.file = ''
     end
     session.cmd.exit = function()
         session.temp.exit = true
-        session.temp.quit = true
+        session.console.active = false
     end
     
     session.scene._text = session.scene.text
@@ -126,11 +127,11 @@ console.loop = function(session)
     local lastline = (session.window.height - session.defaults.text.size)
     if console.virgin then
         session.scene.text = console.logs
-        session.api.new.text(session,'f1 to close console.',session.defaults.text.size,(session.window.height - (session.defaults.text.size)*3))
-        console.barra = session.api.new.text(session,">", session.defaults.text.size, lastline-session.defaults.text.size)
-        console.buffer = session.api.new.text(session,'',session.defaults.text.size *2, lastline-session.defaults.text.size)
-        session.api.table.move(console.logs,session.api.table.find(console.logs,console.barra),1)
+        session.api.autonew.text(session,'f1 to close console.',session.defaults.text.size,(session.window.height - (session.defaults.text.size)*3))
+        console.barra = session.api.autonew.text(session,">", session.defaults.text.size, lastline-session.defaults.text.size)
+        console.buffer = session.api.autonew.text(session,'',session.defaults.text.size *2, lastline-session.defaults.text.size)
         console.virgin = false
+        session.api.table.move(console.logs,session.api.table.find(console.logs,console.barra),1)
     end
     local clock = math.floor(os.clock()*50)
     local lastclock = math.floor(os.clock()*50)
@@ -138,7 +139,7 @@ console.loop = function(session)
     local lastconsolekey
     local spamtime = 20
     local history_index = #console.logs-1
-    while not session.temp.quit do
+    while session.console.active do
         --session.api.table.move(console.logs,session.api.table.find(console.logs,console.buffer),#console.logs)
         lastclock = math.floor(os.clock()*50)
         local keypress = rl.GetKeyPressed()
@@ -151,10 +152,10 @@ console.loop = function(session)
                     txt.position.y = txt.position.y - session.defaults.text.size
                 end
             end
-            if session.temp.quit or not session.console.active then
+            if not session.console.active then
                 break
             end
-            session.api.new.text(session,console.buffer.file, session.defaults.text.size, console.buffer.position.y - (session.defaults.text.size))
+            session.api.autonew.text(session,console.buffer.file, session.defaults.text.size, console.buffer.position.y - (session.defaults.text.size))
             console.buffer.file = ''
             clock = math.floor(os.clock()*50)
             spamtime = 20
@@ -173,8 +174,8 @@ console.loop = function(session)
             spamtime = 20
             lastconsolekey = keypress
             clock = math.floor(os.clock()*50)
-        elseif rl.IsKeyPressed(rl.KEY_F1) and clock ~= lastclock then 
-            session.temp.quit = true
+        elseif (rl.IsKeyPressed(rl.KEY_F1) or rl.IsKeyPressed(rl.KEY_APOSTROPHE)) and clock ~= lastclock then 
+            session.cmd.back()
         elseif history_index > 2 and rl.IsKeyPressed(rl.KEY_UP) and lastclock > clock+spamtime then
             console.buffer.file = console.logs[history_index].file
             spamtime = 20

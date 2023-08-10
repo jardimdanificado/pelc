@@ -29,7 +29,7 @@ local function teclado(session)
         session.scene.camera.fovy = session.scene.camera.fovy - 1
     elseif(rl.IsKeyPressed(rl.KEY_COMMA)) then
         session.scene.camera.fovy = session.scene.camera.fovy + 1
-    elseif rl.IsKeyPressed(rl.KEY_F1) then
+    elseif (rl.IsKeyPressed(rl.KEY_F1) or rl.IsKeyPressed(rl.KEY_APOSTROPHE)) then
         session.console.active = true
     end
 
@@ -70,11 +70,11 @@ session:run('randomcubes')
 
 while not rl.WindowShouldClose() and not session.temp.exit do
     teclado(session)
-    api.lookat(session.scene.camera,pposi)
     if session.console.active then
         session.console.loop(session)
         session.console.active = false
     end
+    api.lookat(session.scene.camera,pposi)
     session.api.process(session,'',session.pipeline.render)
 end
 

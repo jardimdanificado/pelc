@@ -192,12 +192,12 @@ cmd.clear = function(session,args)
                 end
             end
             session.scene.text = session.api.array.clear(session.scene.text)
-            session.api.new.text(session,'f1 to open console',session.defaults.text.size,session.window.height - (session.defaults.text.size*3),rl.BLACK,session.defaults.text.size)
+            session.api.autonew.text(session,'f1 to open console',session.defaults.text.size,session.window.height - (session.defaults.text.size*3),rl.BLACK,session.defaults.text.size)
         end
         session.console.logs = {}
         session.console.active = false
         session.console.virgin = true
-        session.temp.quit = false
+        session.console.active = true
     elseif session.api.array.includes(session.api.array.keys(session.scene),args[1]) then
         session.scene[args[1]] = {}
     elseif session.api.array.includes(session.api.array.keys(session),args[1]) then

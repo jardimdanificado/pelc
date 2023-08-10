@@ -43,9 +43,9 @@ end
 pipe.drawmodel = function(session)
     local fps = rl.GetFPS()
     for i, model in ipairs(session.scene.model) do
-        if model.render then
-            if session.api.shouldPlay(fps,model.framerate,session.scene.frame) then
-                if model.playing then
+        if model.active then
+            if model.playing then
+                if session.api.shouldPlay(fps,model.framerate,session.scene.frame) then
                     if not model.file[2] then
                         model.currentframe = 1
                     elseif model.reverse then
