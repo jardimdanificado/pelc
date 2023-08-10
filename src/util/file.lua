@@ -45,7 +45,6 @@ file.isdir = function(path)
     return result:find("Not a directory") == nil
 end
 
-
 file.load.text = function(path)
     local file = io.open(path, "r")
     local contents = file:read("*all")
@@ -125,6 +124,35 @@ file.load.map = function(filepath)
         end
     end
     return result
+end
+
+file.save.heightmap = function(matrix, filename, drawRamps)
+    local file = io.open(filename, "w")
+    local max = 0
+    drawRamps = drawRamps or false
+    for i=1,#matrix do
+        for j=1,#matrix[i] do
+            if matrix[i][j] > max then
+                max = matrix[i][j]
+            end
+        end
+    end
+    local digits = #tostring(max)
+    for i=1,#matrix do
+        for j=1,#matrix[i] do
+            local value = matrix[i][j]
+            --if (i > 1 and matrix[i-1][j] == value - 1) or (i < #matrix and matrix[i+1][j] == value - 1) or (j > 1 and matrix[i][j-1] == value - 1) or (j < #matrix[i] and matrix[i][j+1] == value - 1) then
+            --file:write(string.rep(">", digits))
+            --else
+            file:write(string.format("%0"..digits.."d", value))
+            --end
+            if j < #matrix[i] then
+                file:write(" ")
+            end
+        end
+        file:write("\n")
+    end
+    file:close()
 end
 
 file.exist = function(path)

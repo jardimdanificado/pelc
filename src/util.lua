@@ -104,6 +104,20 @@ util.id = function(charTable)
     return result
 end
 
+util.assign = function(obj1,obj2)
+    for k, v in pairs(obj2) do
+        obj1[k] = obj2[k]
+    end
+end
+
+util.len = function(obj)
+    local count = 0
+    for k, v in pairs(obj) do
+        count = count + 1
+    end
+    return count
+end
+
 util.turn = function(bool)
     if bool == false then
         return true
